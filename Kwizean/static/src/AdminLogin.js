@@ -2,7 +2,7 @@ import { Button, Checkbox, Card, Form } from 'semantic-ui-react'
 import React, { Component } from "react";
 
 
-export default class Login extends Component{
+export default class AdminLogin extends Component{
 
   constructor(props){
     super(props);
@@ -17,8 +17,8 @@ export default class Login extends Component{
         <img className="login-banner-logo" src="icons/kwizeanFull105.png"/>
         </div>
         <div className="login-holder">
-          <Card className="login-plate">
-            <h1> Sign in to Kwizean </h1>
+          <Card className="login-plate" style={{backgroundColor:"#fddba9"}}>
+            <h1> Sign in to Kwizean as Admin </h1>
             <Form>
               <Form.Field>
                 <label>Email</label>
@@ -30,11 +30,8 @@ export default class Login extends Component{
               </Form.Field>
               <Button id="login-submit" type='submit'>Sign In</Button>
               <a className="login-action" onClick={()=>{
-                switchLoginState("signup");
-              }}>Create Account</a>
-              <a className="login-action" onClick={()=>{
-                switchLoginState("admin");
-              }}>Sign In as Admin </a>
+                switchLoginState("login");
+              }}>Sign In as User </a>
             </Form>
           </Card>
         </div>
