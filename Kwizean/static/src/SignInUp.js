@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Login from "./Login";
 import AdminLogin from "./AdminLogin";
-import CreateAccount from "./CreateAccount"; 
+import CreateAccount from "./CreateAccount";
 export default class SignInUp extends Component{
 
   constructor(props){
