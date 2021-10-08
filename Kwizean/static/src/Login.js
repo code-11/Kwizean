@@ -34,7 +34,7 @@ export default class Login extends Component{
               kzPost("login",data).then(value => {
                 if (value && value.success){
                   setAppState({
-                    pageState:"postlogin",
+                    pageState:"restaurant-list",
                     userEmail:email.value,
                     userAdmin:admin.checked,
                   });

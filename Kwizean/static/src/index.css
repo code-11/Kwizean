@@ -12,9 +12,68 @@ a{
   color: inherit !important;
 }
 
+#review-add-btn{
+  background-color:#FF8000;
+  color: white;
+  cursor:pointer;
+  display:block;
+  margin:50px auto 50px auto;
+  width: 30%;
+}
+
+.review-user{
+  font-weight: bold;
+}
+
+.detail-rating-location-box{
+    clear: both;
+    display: inline-block;
+    width: 100%;
+    margin-bottom:30px;
+}
+
+.detail-location{
+  float: right;
+  margin: 0px;
+}
+
+.detail-rating-box{
+  float: left;
+}
+
+.detail-description-box{
+  width:70%;
+  margin:auto;
+}
+
+.detail-header{
+  font-size:50px;
+}
+
+.detail-background-pane{
+  background-color: #fffaf5;
+}
+
+.detail-pane{
+  width:50%;
+  padding:30px;
+  margin:30px auto;
+  background-color:white;
+}
+
 .restaurant-delete-btn{
   background-color:#ffe8e8 !important;
   width:100% !important;
+}
+
+#restaurant-add-model-confirm{
+  background-color:#FF8000;
+  color: white;
+}
+
+#restaurant-add-model{
+  width: 30%;
+  min-width: 300px;
 }
 
 #restaurant-add-btn{
@@ -35,7 +94,7 @@ a{
 }
 
 .restaurant-grid{
-  padding:30px;
+  padding:30px 100px;
   height:100%;
   background-color:#fffaf5;
 }
@@ -54,6 +113,11 @@ a:hover .restaurant-card {
 
 .restaurant-card-rating-label{
   margin-left:10px;
+  display: inline-block;
+}
+
+.banner-logo-link{
+  cursor:pointer;
 }
 
 .banner-user-label{

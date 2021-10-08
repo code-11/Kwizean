@@ -1,6 +1,7 @@
 import './App.css';
 import SignInUp from "./SignInUp";
-import ResturantList from "./ResturantList";
+import RestaurantList from "./RestaurantList";
+import RestaurantDetail from "./RestaurantDetail";
 import React, { Component } from "react";
 
 export default class App extends Component {
@@ -22,8 +23,10 @@ export default class App extends Component {
     let pageToRender = null;
     if (this.state.pageState == "prelogin"){
       pageToRender = <SignInUp setAppState={this.setAppState} />
-    }else{
-      pageToRender = <ResturantList userEmail={this.state.userEmail} userAdmin={this.state.userAdmin}/>
+    }else if (this.state.pageState == "restaurant-list"){
+      pageToRender = <RestaurantList userEmail={this.state.userEmail} userAdmin={this.state.userAdmin} setAppState={this.setAppState}/>
+    }else if (this.state.pageState == "restaurant-detail"){
+      pageToRender = <RestaurantDetail userEmail={this.state.userEmail} userAdmin={this.state.userAdmin} setAppState={this.setAppState}/>
     }
     return (
       <div className="App">

@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, String, Integer, Boolean
+from sqlalchemy import Column, String, Integer, Boolean, Text
 
 db = SQLAlchemy()
 '''
@@ -22,6 +22,37 @@ def db_clean_init():
     # print("hello world")
     db.drop_all()
     db.create_all()
+
+
+class Restaurant(db.Model):
+    __tablename__ = 'restaurants'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80))
+    location = Column(String(80))
+    description = Column(Text())
+
+    def __init__(self, name, location, description):
+        self.name = name
+        self.location = location
+        self.description = description
+
+    def details(self):
+        return {
+            'name': self.name,
+            'location': self.location,
+            'description': self.description,
+        }
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
 
 
 class User(db.Model):
