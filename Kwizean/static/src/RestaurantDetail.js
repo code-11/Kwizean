@@ -1,5 +1,6 @@
 import React, { Component} from "react";
 import { Button, Checkbox, Card, Form, Label, Rating, Icon, Divider } from 'semantic-ui-react'
+import {kzPost, kzGet} from "./Actions";
 
 export default class RestaurantDetail extends Component {
   constructor(props){
@@ -7,7 +8,8 @@ export default class RestaurantDetail extends Component {
   }
 
   render(){
-    const {userEmail, userAdmin, setAppState}=this.props;
+    const {userEmail, userAdmin, setAppState, selectedRestaurantDetails}=this.props;
+    const {name, location, description} = selectedRestaurantDetails;
     const userAdminStr=userAdmin ? " (Admin)" : "";
     return <div className="detail-background-pane">
           <div className="login-banner">
@@ -23,16 +25,16 @@ export default class RestaurantDetail extends Component {
             </div>
           </div>
           <div className="detail-pane">
-            <h1 className="detail-header"> Restaurant Name </h1>
+            <h1 className="detail-header"> {name} </h1>
             <div className="detail-rating-location-box">
               <div className="detail-rating-box">
                 <Rating defaultRating={3} maxRating={5} disabled/>
                 <p className="restaurant-card-rating-label"> {3.5 + ("  ("+150+" reviews)")} </p>
               </div>
-              <h4 className="detail-location"> 135 N Reading St.</h4>
+              <h4 className="detail-location"> {location}</h4>
             </div>
             <div className="detail-description-box">
-              <h4> Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? </h4>
+              <h4> {description} </h4>
             </div>
             <Divider/>
             <h3> Latest Review </h3>

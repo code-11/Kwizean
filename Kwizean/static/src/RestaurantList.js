@@ -17,6 +17,18 @@ export default class RestaurantList extends Component {
     this.getRestaurants();
   }
 
+  setSelectedRestaurantDetails(id){
+    const {setAppState} = this.props;
+    kzPost("getrestaurantdetails",{id:id}).then(restaurantDetailResponse=>{
+      if(restaurantDetailResponse && restaurantDetailResponse.success){
+        setAppState({
+          selectedRestaurantDetails: restaurantDetailResponse.data,
+          pageState:"restaurant-detail",
+        });
+      }
+    });
+  }
+
   getRestaurants(){
     kzGet("getrestaurants").then(restaurantListResponse=>{
       if(restaurantListResponse && restaurantListResponse.success){
@@ -127,7 +139,7 @@ export default class RestaurantList extends Component {
           {tagContainer}
           <Card.Content extra>
             <Button className="restaurant-details-btn" onClick={()=>{
-              setAppState({ pageState:"restaurant-detail"});
+              this.setSelectedRestaurantDetails(restaurantObj.id);
             }}> See Details </Button>
             {possibleDeleteBtn}
           </Card.Content>

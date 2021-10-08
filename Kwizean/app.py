@@ -18,6 +18,17 @@ def create_app():
     # Only need to do this once?
     # db_clean_init()
 
+
+    @app.route('/api/getrestaurantdetails', methods=['POST'])
+    def get_restaurant():
+        content_type = {'ContentType': 'application/json'}
+        restaurant_id = request.json.get("id")
+        matching_restaurant = Restaurant.query.filter_by(id=restaurant_id).first()
+        if matching_restaurant is None:
+            return response(False, "No restaurant with that ID", 400, content_type)
+        else:
+            return json.dumps({'success': True, 'data': matching_restaurant.to_dict()}), 200, content_type
+
     @app.route('/api/getrestaurants')
     def get_restaurants():
         content_type = {'ContentType': 'application/json'}
