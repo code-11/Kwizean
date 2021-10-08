@@ -7,6 +7,7 @@ export default class RestaurantList extends Component {
     super(props);
     this.state={
       addRestaurantModelOpen:false,
+      deleteRestaurantModalId: null,
       restaurants:[],
       fetchingRestaurants:true,
     }
@@ -27,6 +28,35 @@ export default class RestaurantList extends Component {
     });
   }
 
+  deleteRestaurant(id){
+    kzPost("deleterestaurant",{id}).then(restaurantDeletionResponse=>{
+      if(restaurantDeletionResponse && restaurantDeletionResponse.success){
+        this.setState({
+          fetchingRestaurants:true,
+          deleteRestaurantModalId:null,
+        }, this.getRestaurants());
+      }
+    });
+  }
+
+  createDeleteRestaurantButton(restaurantObj){
+    const {deleteRestaurantModalId} = this.state;
+    return <Modal
+      open={deleteRestaurantModalId==restaurantObj.id}
+      trigger={<Button className="restaurant-delete-btn" onClick={()=>{this.setState({deleteRestaurantModalId:restaurantObj.id})}}>Delete</Button>}>
+      <Modal.Header>Delete Restaurant?</Modal.Header>
+      <Modal.Content>
+        <Modal.Description>
+          <p>{"This action cannot be undone. Are you sure you want to delete "+restaurantObj.name+"?"}</p>
+        </Modal.Description>
+      </Modal.Content>
+      <Modal.Actions>
+        <Button color='black' onClick={() => this.setState({deleteRestaurantModalId:null})}> Cancel </Button>
+        <Button onClick={()=>{this.deleteRestaurant(restaurantObj.id)}}> Delete </Button>
+      </Modal.Actions>
+    </Modal>
+  }
+
   submitRestaurant(e){
     const elements=e.target.elements;
     const {name,location,description} = elements;
@@ -37,7 +67,10 @@ export default class RestaurantList extends Component {
     };
     kzPost("createrestaurant",data).then(value => {
       if (value && value.success){
-        this.setState({addRestaurantModelOpen:false});
+        this.setState({
+          addRestaurantModelOpen:false,
+          fetchingRestaurants:true,
+        }, this.getRestaurants());
       }else{
         console.log("Failed to make restaurant");
       }
@@ -78,35 +111,27 @@ export default class RestaurantList extends Component {
     const {name,location,description,}=restaurantObj;
     const avgRating=3;
     const numReviews=105;
-    const tagElementList = null;// tagList.map((tag)=><Label>{tag}</Label>);
+    const tagContainer = null;// <Card.Content extra>{tagList.map((tag)=><Label>{tag}</Label>)}</Card.Content>;
 
-    const possibleDeleteBtn = !this.props.userAdmin ? null :
-      <Card.Content extra>
-        <Button className="restaurant-delete-btn">Delete</Button>
-      </Card.Content>;
+    const possibleDeleteBtn = !this.props.userAdmin ? null : this.createDeleteRestaurantButton(restaurantObj);
 
     return (
-    <a onClick={()=>{
-      setAppState({
-        pageState:"restaurant-detail"
-      });
-    }}>
       <Card className="restaurant-card">
-        <Card.Content>
-          <Card.Header>{name}</Card.Header>
-          <Card.Meta>{location}</Card.Meta>
-          <Card.Description>{description}</Card.Description>
-          <Rating className="restaurant-card-rating" defaultRating={avgRating} maxRating={5} disabled/>
-          <p className="restaurant-card-rating-label"> {avgRating + ("  ("+numReviews+" reviews)")} </p>
-        </Card.Content>
-        <Card.Content extra>
-        <div>
-          {tagElementList}
-        </div>
-        </Card.Content>
-        {possibleDeleteBtn}
-      </Card>
-    </a>);
+          <Card.Content>
+            <Card.Header>{name}</Card.Header>
+            <Card.Meta>{location}</Card.Meta>
+            <Card.Description>{description}</Card.Description>
+            <Rating className="restaurant-card-rating" defaultRating={avgRating} maxRating={5} disabled/>
+            <p className="restaurant-card-rating-label"> {avgRating + ("  ("+numReviews+" reviews)")} </p>
+          </Card.Content>
+          {tagContainer}
+          <Card.Content extra>
+            <Button className="restaurant-details-btn" onClick={()=>{
+              setAppState({ pageState:"restaurant-detail"});
+            }}> See Details </Button>
+            {possibleDeleteBtn}
+          </Card.Content>
+      </Card>);
   }
 
   render(){

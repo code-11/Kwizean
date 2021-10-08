@@ -41,6 +41,23 @@ def create_app():
         else:
             return response(False, "Failed to make restaurant", 400, content_type)
 
+    @app.route('/api/deleterestaurant', methods=['POST'])
+    def delete_restaurant():
+        content_type = {'ContentType': 'application/json'}
+        if request.method == 'POST':
+            restaurant_id = request.json.get("id")
+            if restaurant_id is None:
+                return response(False, "Failed to delete restaurant", 400, content_type)
+            else:
+                matching_restaurant = Restaurant.query.filter_by(id=restaurant_id).first()
+                if matching_restaurant is None:
+                    return response(False, "No restaurant with that ID", 400, content_type)
+                else:
+                    matching_restaurant.delete()
+                    return json.dumps({'success': True}), 200, content_type
+        else:
+            return response(False, "Failed to delete restaurant", 400, content_type)
+
     @app.route('/api/login', methods=['POST'])
     def login():
         content_type = {'ContentType': 'application/json'}
