@@ -16,7 +16,14 @@ def create_app():
     CORS(app)
 
     # Only need to do this once?
-    db_clean_init()
+    # db_clean_init()
+
+    @app.route('/api/getrestaurants')
+    def get_restaurants():
+        content_type = {'ContentType': 'application/json'}
+        all_restaurants = Restaurant.query.all()
+        jsonified_restaurants = list(map(lambda r: r.to_dict(), all_restaurants))
+        return json.dumps({'success': True, 'data': jsonified_restaurants}), 200, content_type
 
     @app.route('/api/createrestaurant', methods=['POST'])
     def create_restaurant():

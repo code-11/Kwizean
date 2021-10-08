@@ -36,8 +36,9 @@ class Restaurant(db.Model):
         self.location = location
         self.description = description
 
-    def details(self):
+    def to_dict(self):
         return {
+            'id': self.id,
             'name': self.name,
             'location': self.location,
             'description': self.description,
@@ -73,7 +74,7 @@ class User(db.Model):
         self.password = password
         self.is_admin = is_admin
 
-    def details(self):
+    def to_dict(self):
         return {
             'id': self.id,
             'is_admin': self.is_admin,

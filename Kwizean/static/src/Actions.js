@@ -8,3 +8,11 @@ export const kzPost = (endpoint, jsonData)=>{
   };
   return fetch(API_LOCATION+"/"+endpoint,requestOptions).then(response => response.json());
 }
+
+export const kzGet = (endpoint) =>{
+  const requestOptions ={
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  }
+  return fetch(API_LOCATION+"/"+endpoint,requestOptions).then(response => response.json());
+}

@@ -1,13 +1,30 @@
 import React, { Component} from "react";
-import { Button, Checkbox, Card, Form, Label, Rating, Icon, Modal, Header } from 'semantic-ui-react'
-import {kzPost} from "./Actions";
+import { Button, Checkbox, Card, Form, Label, Rating, Icon, Modal, Header, Loader } from 'semantic-ui-react'
+import {kzPost, kzGet} from "./Actions";
 
 export default class RestaurantList extends Component {
   constructor(props){
     super(props);
     this.state={
-      addRestaurantModelOpen:false
+      addRestaurantModelOpen:false,
+      restaurants:[],
+      fetchingRestaurants:true,
     }
+  }
+
+  componentDidMount(){
+    this.getRestaurants();
+  }
+
+  getRestaurants(){
+    kzGet("getrestaurants").then(restaurantListResponse=>{
+      if(restaurantListResponse && restaurantListResponse.success){
+        this.setState({
+          restaurants:restaurantListResponse.data,
+          fetchingRestaurants:false,
+        });
+      }
+    });
   }
 
   submitRestaurant(e){
@@ -55,9 +72,12 @@ export default class RestaurantList extends Component {
     </Modal>
   }
 
-  createCard(name, location, desc, avgRating, numReviews, tagList){
+  // createCard(name, location, desc, avgRating, numReviews, tagList){
+  createCard(restaurantObj){
     const {setAppState} = this.props;
-
+    const {name,location,description,}=restaurantObj;
+    const avgRating=3;
+    const numReviews=105;
     const tagElementList = null;// tagList.map((tag)=><Label>{tag}</Label>);
 
     const possibleDeleteBtn = !this.props.userAdmin ? null :
@@ -75,7 +95,7 @@ export default class RestaurantList extends Component {
         <Card.Content>
           <Card.Header>{name}</Card.Header>
           <Card.Meta>{location}</Card.Meta>
-          <Card.Description>{desc}</Card.Description>
+          <Card.Description>{description}</Card.Description>
           <Rating className="restaurant-card-rating" defaultRating={avgRating} maxRating={5} disabled/>
           <p className="restaurant-card-rating-label"> {avgRating + ("  ("+numReviews+" reviews)")} </p>
         </Card.Content>
@@ -92,20 +112,11 @@ export default class RestaurantList extends Component {
   render(){
 
     const {userEmail, userAdmin}=this.props;
-
-    const restaurantInfo=[
-      this.createCard("Pizza Junction",
-        "135 N. Reading St.",
-        "Pizza Junction has been serving the Metropolis area for over thirty years. With an unsurpassed attention to quality, fresh ingredients and timely delivery, find out whats new at the Junction!",
-        3.5 ,
-        105,
-        ["Pizzas","Calzones","Salads","Falafel"]
-      )
-    ]
+    const {restaurants, fetchingRestaurants} = this.state;
+    const restaurantInfo=restaurants.map((r)=>this.createCard(r));
 
     const userAdminStr=userAdmin ? " (Admin)" : "";
     const possibleAddRestaurantBtn = !userAdmin ? null : this.createAddRestaurantButton();
-
 
     return <div className="restaurant-page">
       <div className="login-banner">
@@ -117,9 +128,12 @@ export default class RestaurantList extends Component {
       </div>
       <div className="restaurant-grid">
         <h2 className="restaurant-grid-header"> The best restaurants in your area </h2>
-        <Card.Group>
-          {restaurantInfo}
-        </Card.Group>
+        {
+          fetchingRestaurants ? <Loader active inline='centered'> Loading Restaurants </Loader> :
+          <Card.Group>
+            {restaurantInfo}
+          </Card.Group>
+        }
       </div>
       {possibleAddRestaurantBtn}
     </div>;
