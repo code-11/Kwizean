@@ -37,6 +37,7 @@ export default class Login extends Component{
                     pageState:"restaurant-list",
                     userEmail:email.value,
                     userAdmin:admin.checked,
+                    userId:value.userId,
                   });
                 }else{
                   this.setState({

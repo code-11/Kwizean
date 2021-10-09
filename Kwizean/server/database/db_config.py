@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, String, Integer, Boolean, Text
+from sqlalchemy import Column, String, Integer, Boolean, Text, ForeignKey, Date
+from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
 '''
@@ -24,12 +25,41 @@ def db_clean_init():
     db.create_all()
 
 
+class Review(db.Model):
+    __tablename__ = 'reviews'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    visit_date = Column(Date)
+    rating = Column(Integer)
+    content = Column(Text())
+    restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
+
+    def __init__(self, visit_date, rating, content, restaurant_id, user_id):
+        self.visit_date = visit_date
+        self.rating = rating
+        self.content = content
+        self.restaurant_id = restaurant_id
+        self.user_id = user_id
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+
 class Restaurant(db.Model):
     __tablename__ = 'restaurants'
     id = Column(Integer, primary_key=True)
     name = Column(String(80))
     location = Column(String(80))
     description = Column(Text())
+    children = relationship("Review")
 
     def __init__(self, name, location, description):
         self.name = name

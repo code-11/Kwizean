@@ -1,6 +1,7 @@
 import React, { Component} from "react";
 import { Button, Checkbox, Card, Form, Label, Rating, Icon, Divider } from 'semantic-ui-react'
 import RestaurantEditButton from "./RestaurantEditButton";
+import ReviewEditButton from "./ReviewEditButton";
 import {kzPost, kzGet} from "./Actions";
 
 export default class RestaurantDetail extends Component {
@@ -8,9 +9,9 @@ export default class RestaurantDetail extends Component {
     super(props);
     this.state={
       addRestaurantModelOpen:false,
+      addReviewModalOpen:false,
     }
   }
-
 
   //TODO: This is the same as the one in RestaurantList. Refactor
   setSelectedRestaurantDetails(id){
@@ -46,9 +47,21 @@ export default class RestaurantDetail extends Component {
     });
   }
 
+  addReview(data){
+    kzPost("addreview",data).then(value => {
+      if (value && value.success){
+        this.setState({
+          addReviewModalOpen:false,
+        });
+      }else{
+        console.log("Failed to add review");
+      }
+    });
+  }
+
   render(){
-    const {addRestaurantModelOpen} = this.state;
-    const {userEmail, userAdmin, setAppState, selectedRestaurantDetails}=this.props;
+    const {addRestaurantModelOpen,addReviewModalOpen} = this.state;
+    const {userEmail, userAdmin, userId, setAppState, selectedRestaurantDetails}=this.props;
     const {name, location, description} = selectedRestaurantDetails;
     const userAdminStr=userAdmin ? " (Admin)" : "";
     return <div className="detail-background-pane">
@@ -110,7 +123,13 @@ export default class RestaurantDetail extends Component {
               <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.</p>
               <p>John Goodbody Esq.</p>
             </div>
-            <Button id="review-add-btn"> Add Review </Button>
+            <ReviewEditButton
+              open={addReviewModalOpen}
+              setParentState={(s)=>this.setState(s)}
+              onSubmit={(data)=>this.addReview({...data, ...{userId,restaurantId:selectedRestaurantDetails.id}})}
+              actionText={"Add Review"}
+              buttonId={"review-add-btn"}
+            />
           </div>
       </div>
   }

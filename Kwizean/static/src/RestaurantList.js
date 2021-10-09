@@ -90,34 +90,6 @@ export default class RestaurantList extends Component {
     });
   }
 
-  // createAddRestaurantButton(){
-  //   const {addRestaurantModelOpen} = this.state;
-  //   return <Modal
-  //     id="restaurant-add-modal"
-  //     onClose={() => {}}
-  //     onOpen={() => {}}
-  //     open={addRestaurantModelOpen}
-  //     trigger={<Label id="restaurant-add-btn" onClick={()=>this.setState({addRestaurantModelOpen:true})}><h2> Add Restaurant </h2></Label>}
-  //   >
-  //     <Modal.Header>Add Restaurant</Modal.Header>
-  //     <Modal.Content>
-  //       <Form onSubmit={(e)=>{this.submitRestaurant(e)}}>
-  //         <Form.Field>
-  //           <label>Restaurant Name</label>
-  //           <input placeholder='Restaurant Name' name="name" />
-  //         </Form.Field>
-  //         <Form.Field>
-  //           <label>Restaurant Location</label>
-  //           <input placeholder='Restaurant Location' name="location" />
-  //         </Form.Field>
-  //         <Form.TextArea name="description" label='Description' placeholder='Tell us more about this restaurant...' />
-  //         <Button color='black' onClick={ ()=>this.setState({addRestaurantModelOpen:false}) }> Cancel </Button>
-  //         <Button id="restaurant-add-model-confirm" content="Submit Restaurant" type="submit"/>
-  //       </Form>
-  //     </Modal.Content>
-  //   </Modal>
-  // }
-
   // createCard(name, location, desc, avgRating, numReviews, tagList){
   createCard(restaurantObj){
     const {setAppState} = this.props;

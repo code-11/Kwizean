@@ -3,7 +3,7 @@ import os
 from flask import Flask
 from flask import request
 from flask_cors import CORS
-from server.database.db_config import setup_db, db_clean_init, User, Restaurant
+from server.database.db_config import setup_db, db_clean_init, User, Restaurant, Review
 import jwt
 
 
@@ -18,6 +18,23 @@ def create_app():
     # Only need to do this once?
     # db_clean_init()
 
+
+    @app.route('/api/addreview', methods=['POST'])
+    def add_review():
+        content_type = {'ContentType': 'application/json'}
+        restaurant_id = request.json.get("restaurantId")
+        user_id = request.json.get("userId")
+        rating = request.json.get("rating")
+        date = request.json.get("date")
+        content = request.json.get("content")
+        matching_restaurant = Restaurant.query.filter_by(id=restaurant_id).first()
+        matching_user = User.query.filter_by(id=user_id).first()
+        if matching_restaurant is None or matching_user is None:
+            return response(False, "Could not find connections", 400, content_type)
+        else:
+            new_review = Review(date, rating, content, restaurant_id, user_id)
+            new_review.insert()
+            return json.dumps({'success': True}), 200, content_type
 
     @app.route('/api/updaterestaurantdetails', methods=['POST'])
     def update_restaurant():
@@ -97,7 +114,7 @@ def create_app():
                 if matching_user is None:
                     return response(False, "Incorrect Login", 403, content_type)
                 else:
-                    return json.dumps({'success': True}), 200, content_type
+                    return json.dumps({'success': True, 'userId': matching_user.id}), 200, content_type
         else:
             return response(False, "Incorrect Login", 400, content_type)
 
