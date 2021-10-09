@@ -12,6 +12,17 @@ a{
   color: inherit !important;
 }
 
+#detail-edit-btn{
+  background-color:#FF8000;
+  color: white;
+  cursor:pointer;
+  display:block;
+  margin:50px auto 50px auto;
+  width: 30%;
+  font-size: 14px;
+  text-align: center;
+}
+
 #review-add-btn{
   background-color:#FF8000;
   color: white;
@@ -89,6 +100,7 @@ a{
   bottom: 40px;
   left: 30px;
   cursor:pointer;
+  font-size:18px;
 }
 
 .restaurant-page{

@@ -44,6 +44,12 @@ class Restaurant(db.Model):
             'description': self.description,
         }
 
+    def kz_update(self, name, location, description):
+        setattr(self, 'name', name)
+        setattr(self, 'location', location)
+        setattr(self, 'description', description)
+        db.session.commit()
+
     def insert(self):
         db.session.add(self)
         db.session.commit()

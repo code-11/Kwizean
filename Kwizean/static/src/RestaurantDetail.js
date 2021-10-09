@@ -1,13 +1,53 @@
 import React, { Component} from "react";
 import { Button, Checkbox, Card, Form, Label, Rating, Icon, Divider } from 'semantic-ui-react'
+import RestaurantEditButton from "./RestaurantEditButton";
 import {kzPost, kzGet} from "./Actions";
 
 export default class RestaurantDetail extends Component {
   constructor(props){
     super(props);
+    this.state={
+      addRestaurantModelOpen:false,
+    }
+  }
+
+
+  //TODO: This is the same as the one in RestaurantList. Refactor
+  setSelectedRestaurantDetails(id){
+    const {setAppState} = this.props;
+    kzPost("getrestaurantdetails",{id:id}).then(restaurantDetailResponse=>{
+      if(restaurantDetailResponse && restaurantDetailResponse.success){
+        setAppState({
+          selectedRestaurantDetails: restaurantDetailResponse.data,
+          pageState:"restaurant-detail",
+        });
+      }
+    });
+  }
+
+  updateRestaurantDetails(e,id){
+    const elements=e.target.elements;
+    const {name,location,description} = elements;
+    const data={
+      id:id,
+      name:name.value,
+      location:location.value,
+      description:description.value,
+    };
+    kzPost("updaterestaurantdetails", data).then(value => {
+      if (value && value.success){
+          this.setSelectedRestaurantDetails(id);
+          this.setState({
+            addRestaurantModelOpen:false,
+          });
+      }else{
+        console.log("Failed to update restaurant");
+      }
+    });
   }
 
   render(){
+    const {addRestaurantModelOpen} = this.state;
     const {userEmail, userAdmin, setAppState, selectedRestaurantDetails}=this.props;
     const {name, location, description} = selectedRestaurantDetails;
     const userAdminStr=userAdmin ? " (Admin)" : "";
@@ -36,6 +76,18 @@ export default class RestaurantDetail extends Component {
             <div className="detail-description-box">
               <h4> {description} </h4>
             </div>
+
+            {!userAdmin ? null:
+              <RestaurantEditButton
+                  open={addRestaurantModelOpen}
+                  setParentState={(s)=>this.setState(s)}
+                  onSubmit={(e)=>this.updateRestaurantDetails(e, selectedRestaurantDetails.id)}
+                  actionText={"Edit Restaurant"}
+                  buttonId="detail-edit-btn"
+                  restaurantObj={selectedRestaurantDetails}
+                  />
+            }
+
             <Divider/>
             <h3> Latest Review </h3>
             <div>

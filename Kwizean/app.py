@@ -19,6 +19,20 @@ def create_app():
     # db_clean_init()
 
 
+    @app.route('/api/updaterestaurantdetails', methods=['POST'])
+    def update_restaurant():
+        content_type = {'ContentType': 'application/json'}
+        restaurant_id = request.json.get("id")
+        name = request.json.get("name")
+        location = request.json.get("location")
+        description = request.json.get("description")
+        matching_restaurant = Restaurant.query.filter_by(id=restaurant_id).first()
+        if matching_restaurant is None:
+            return response(False, "No restaurant with that ID", 400, content_type)
+        else:
+            matching_restaurant.kz_update(name, location, description)
+            return json.dumps({'success': True}), 200, content_type
+
     @app.route('/api/getrestaurantdetails', methods=['POST'])
     def get_restaurant():
         content_type = {'ContentType': 'application/json'}

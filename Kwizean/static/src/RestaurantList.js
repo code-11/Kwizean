@@ -1,5 +1,6 @@
 import React, { Component} from "react";
 import { Button, Checkbox, Card, Form, Label, Rating, Icon, Modal, Header, Loader } from 'semantic-ui-react'
+import RestaurantEditButton from "./RestaurantEditButton";
 import {kzPost, kzGet} from "./Actions";
 
 export default class RestaurantList extends Component {
@@ -89,33 +90,33 @@ export default class RestaurantList extends Component {
     });
   }
 
-  createAddRestaurantButton(){
-    const {addRestaurantModelOpen} = this.state;
-    return <Modal
-      id="restaurant-add-modal"
-      onClose={() => {}}
-      onOpen={() => {}}
-      open={addRestaurantModelOpen}
-      trigger={<Label id="restaurant-add-btn" onClick={()=>this.setState({addRestaurantModelOpen:true})}><h2> Add Restaurant </h2></Label>}
-    >
-      <Modal.Header>Add Restaurant</Modal.Header>
-      <Modal.Content>
-        <Form onSubmit={(e)=>{this.submitRestaurant(e)}}>
-          <Form.Field>
-            <label>Restaurant Name</label>
-            <input placeholder='Restaurant Name' name="name" />
-          </Form.Field>
-          <Form.Field>
-            <label>Restaurant Location</label>
-            <input placeholder='Restaurant Location' name="location" />
-          </Form.Field>
-          <Form.TextArea name="description" label='Description' placeholder='Tell us more about this restaurant...' />
-          <Button color='black' onClick={ ()=>this.setState({addRestaurantModelOpen:false}) }> Cancel </Button>
-          <Button id="restaurant-add-model-confirm" content="Submit Restaurant" type="submit"/>
-        </Form>
-      </Modal.Content>
-    </Modal>
-  }
+  // createAddRestaurantButton(){
+  //   const {addRestaurantModelOpen} = this.state;
+  //   return <Modal
+  //     id="restaurant-add-modal"
+  //     onClose={() => {}}
+  //     onOpen={() => {}}
+  //     open={addRestaurantModelOpen}
+  //     trigger={<Label id="restaurant-add-btn" onClick={()=>this.setState({addRestaurantModelOpen:true})}><h2> Add Restaurant </h2></Label>}
+  //   >
+  //     <Modal.Header>Add Restaurant</Modal.Header>
+  //     <Modal.Content>
+  //       <Form onSubmit={(e)=>{this.submitRestaurant(e)}}>
+  //         <Form.Field>
+  //           <label>Restaurant Name</label>
+  //           <input placeholder='Restaurant Name' name="name" />
+  //         </Form.Field>
+  //         <Form.Field>
+  //           <label>Restaurant Location</label>
+  //           <input placeholder='Restaurant Location' name="location" />
+  //         </Form.Field>
+  //         <Form.TextArea name="description" label='Description' placeholder='Tell us more about this restaurant...' />
+  //         <Button color='black' onClick={ ()=>this.setState({addRestaurantModelOpen:false}) }> Cancel </Button>
+  //         <Button id="restaurant-add-model-confirm" content="Submit Restaurant" type="submit"/>
+  //       </Form>
+  //     </Modal.Content>
+  //   </Modal>
+  // }
 
   // createCard(name, location, desc, avgRating, numReviews, tagList){
   createCard(restaurantObj){
@@ -149,11 +150,18 @@ export default class RestaurantList extends Component {
   render(){
 
     const {userEmail, userAdmin}=this.props;
-    const {restaurants, fetchingRestaurants} = this.state;
+    const {restaurants, fetchingRestaurants,addRestaurantModelOpen} = this.state;
     const restaurantInfo=restaurants.map((r)=>this.createCard(r));
 
     const userAdminStr=userAdmin ? " (Admin)" : "";
-    const possibleAddRestaurantBtn = !userAdmin ? null : this.createAddRestaurantButton();
+    const possibleAddRestaurantBtn = !userAdmin ? null :
+    <RestaurantEditButton
+      open={addRestaurantModelOpen}
+      setParentState={(s)=>this.setState(s)}
+      onSubmit={(e)=>this.submitRestaurant(e)}
+      actionText={"Add Restaurant"}
+      buttonId="restaurant-add-btn"
+      />;
 
     return <div className="restaurant-page">
       <div className="login-banner">
