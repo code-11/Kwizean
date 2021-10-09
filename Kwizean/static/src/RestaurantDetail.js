@@ -1,5 +1,5 @@
 import React, { Component} from "react";
-import { Button, Checkbox, Card, Form, Label, Rating, Icon, Divider } from 'semantic-ui-react'
+import { Button, Checkbox, Card, Form, Label, Rating, Icon, Divider, Segment } from 'semantic-ui-react'
 import RestaurantEditButton from "./RestaurantEditButton";
 import ReviewEditButton from "./ReviewEditButton";
 import {kzPost, kzGet} from "./Actions";
@@ -10,12 +10,12 @@ export default class RestaurantDetail extends Component {
     this.state={
       addRestaurantModelOpen:false,
       addReviewModalOpen:false,
-      specialReviews:{},
+      reviews:{},
     }
   }
 
   componentDidMount(){
-    this.getSpecialReviews();
+    this.getAppropriateReviews();
   }
 
   //TODO: This is the same as the one in RestaurantList. Refactor
@@ -52,11 +52,31 @@ export default class RestaurantDetail extends Component {
     });
   }
 
+  getAppropriateReviews(){
+    if (this.props.userAdmin){
+      this.getAllReviews();
+    }else{
+      this.getSpecialReviews();
+    }
+  }
+
+  getAllReviews(){
+    kzGet("getreviews").then(response => {
+      if (response && response.success){
+        this.setState({
+          reviews:response.data,
+        });
+      }else{
+        console.log("Failed to get reviews");
+      }
+    });
+  }
+
   getSpecialReviews(){
     kzGet("getspecialreviews").then(response => {
       if (response && response.success){
         this.setState({
-          specialReviews:response.data,
+          reviews:response.data,
         });
       }else{
         console.log("Failed to get special reviews");
@@ -69,7 +89,7 @@ export default class RestaurantDetail extends Component {
       if (value && value.success){
         this.setState({
           addReviewModalOpen:false,
-        },this.getSpecialReviews());
+        },this.getAppropriateReviews());
       }else{
         console.log("Failed to add review");
       }
@@ -78,19 +98,56 @@ export default class RestaurantDetail extends Component {
 
   createReview(reviewObj){
     return (!reviewObj ? <p>No review found</p> :
-    <div>
+    <Segment>
       <Rating defaultRating={reviewObj.rating} maxRating={5} disabled/>
       <p>Visited {reviewObj.date}</p>
       <p>{reviewObj.content}</p>
-      <p className="review-user">{reviewObj.userName}</p>
-    </div>);
+      <p className="review-user">{reviewObj.userFullName}</p>
+    </Segment>);
+  }
+
+  isObject(thing){
+    return typeof thing === 'object' &&
+    !Array.isArray(thing) &&
+    thing !== null;
   }
 
   render(){
-    const {addRestaurantModelOpen,addReviewModalOpen,specialReviews} = this.state;
+    const {addRestaurantModelOpen,addReviewModalOpen,reviews} = this.state;
     const {userEmail, userAdmin, userId, setAppState, selectedRestaurantDetails}=this.props;
     const {name, location, description} = selectedRestaurantDetails;
     const userAdminStr=userAdmin ? " (Admin)" : "";
+
+    const userReviewSection=
+      <div>
+        <h3> Latest Review </h3>
+          {this.createReview(reviews.newestReview)}
+        <h3> Highest Review </h3>
+          {this.createReview(reviews.maxRatingReview)}
+        <h3>Lowest Review </h3>
+          {this.createReview(reviews.minRatingReview)}
+        <ReviewEditButton
+          open={addReviewModalOpen}
+          setParentState={(s)=>this.setState(s)}
+          onSubmit={(data)=>this.addReview({...data, ...{userId,restaurantId:selectedRestaurantDetails.id}})}
+          actionText={"Add Review"}
+          buttonId={"review-add-btn"}/>
+      </div>
+
+    const adminReviewSection=
+        <div>
+          <h3> All Reviews </h3>
+          <ReviewEditButton
+            open={addReviewModalOpen}
+            setParentState={(s)=>this.setState(s)}
+            onSubmit={(data)=>this.addReview({...data, ...{userId,restaurantId:selectedRestaurantDetails.id}})}
+            actionText={"Add Review"}
+            buttonId={"review-add-btn"}/>
+          <div>
+            {!this.isObject(reviews) ? reviews.map((rev)=>this.createReview(rev)) : null}
+          </div>
+        </div>
+
     return <div className="detail-background-pane">
           <div className="login-banner">
             <a className="banner-logo-link" onClick={()=>setAppState({
@@ -129,19 +186,9 @@ export default class RestaurantDetail extends Component {
             }
 
             <Divider/>
-            <h3> Latest Review </h3>
-              {this.createReview(specialReviews.newestReview)}
-            <h3> Highest Review </h3>
-              {this.createReview(specialReviews.maxRatingReview)}
-            <h3>Lowest Review </h3>
-              {this.createReview(specialReviews.minRatingReview)}
-            <ReviewEditButton
-              open={addReviewModalOpen}
-              setParentState={(s)=>this.setState(s)}
-              onSubmit={(data)=>this.addReview({...data, ...{userId,restaurantId:selectedRestaurantDetails.id}})}
-              actionText={"Add Review"}
-              buttonId={"review-add-btn"}
-            />
+            <div>
+              {!userAdmin ? userReviewSection : adminReviewSection}
+            </div>
           </div>
       </div>
   }

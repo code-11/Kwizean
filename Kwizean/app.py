@@ -19,6 +19,23 @@ def create_app():
     # Only need to do this once?
     # db_clean_init()
 
+    @app.route("/api/getreviews")
+    def get_reviews():
+        content_type = {'ContentType': 'application/json'}
+        all_reviews = Review.query.join(User, User.id == Review.user_id)\
+            .add_columns(User.first_name, User.last_name)\
+            .order_by(Review.visit_date.desc())\
+            .all()
+
+        def rev_tup_to_dict(rev_tup):
+            rev, first_name, last_name = rev_tup
+            rev_dict = rev.to_dict()
+            rev_dict["userFullName"] = first_name+" "+last_name
+            return rev_dict
+
+        data=list(map(rev_tup_to_dict, all_reviews))
+        return json.dumps({'success': True, 'data': data}), 200, content_type
+
 
     @app.route('/api/getspecialreviews')
     def get_special_reviews():
@@ -47,9 +64,9 @@ def create_app():
         min_dict = min_rating_review.to_dict()
         newest_dict = newest_review.to_dict()
 
-        max_dict["userName"] = max_user.full_name()
-        min_dict["userName"] = min_user.full_name()
-        newest_dict["userName"] = newest_user.full_name()
+        max_dict["userFullName"] = max_user.full_name()
+        min_dict["userFullName"] = min_user.full_name()
+        newest_dict["userFullName"] = newest_user.full_name()
 
         data = {'maxRatingReview': max_dict, 'minRatingReview': min_dict, 'newestReview': newest_dict}
         return json.dumps({'success': True, 'data': data}), 200, content_type
