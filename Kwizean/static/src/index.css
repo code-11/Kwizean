@@ -28,8 +28,31 @@ a{
   color: white;
   cursor:pointer;
   display:block;
-  margin:50px auto 50px auto;
+  margin:25px auto 25px auto;
   width: 30%;
+}
+
+.review-box{
+  display:flex;
+  flex-direction: row;
+  justify-content:space-between;
+  align-items: stretch;
+  align-content: stretch;
+  gap: 20px;
+}
+
+.review-action-box{
+  display:flex;
+  flex-direction:column;
+  gap: 20px;
+}
+
+.review-action-box > .review-edit-btn{
+  background-color:#f3f3f3 !important;
+}
+
+.review-action-box > .review-delete-btn{
+  background-color:#ffe8e8 !important;
 }
 
 .review-user{

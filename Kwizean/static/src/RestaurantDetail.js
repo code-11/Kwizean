@@ -84,6 +84,16 @@ export default class RestaurantDetail extends Component {
     });
   }
 
+  deleteReview(reviewId){
+    kzPost("deletereview",{reviewId}).then(value => {
+      if (value && value.success){
+        this.getAppropriateReviews();
+      }else{
+        console.log("Failed to delete review");
+      }
+    });
+  }
+
   addReview(data){
     kzPost("addreview",data).then(value => {
       if (value && value.success){
@@ -97,12 +107,22 @@ export default class RestaurantDetail extends Component {
   }
 
   createReview(reviewObj){
+    const {userAdmin} = this.props;
     return (!reviewObj ? <p>No review found</p> :
     <Segment>
-      <Rating defaultRating={reviewObj.rating} maxRating={5} disabled/>
-      <p>Visited {reviewObj.date}</p>
-      <p>{reviewObj.content}</p>
-      <p className="review-user">{reviewObj.userFullName}</p>
+      <div className="review-box">
+        <div className="review-content-box">
+          <Rating defaultRating={reviewObj.rating} maxRating={5} disabled/>
+          <p>Visited {reviewObj.date}</p>
+          <p>{reviewObj.content}</p>
+          <p className="review-user">{reviewObj.userFullName}</p>
+        </div>
+        {userAdmin ?
+        <div className="review-action-box">
+          <Button className="review-edit-btn"> Edit </Button>
+          <Button className="review-delete-btn" onClick={()=>{this.deleteReview(reviewObj.id)}}> Delete </Button>
+        </div>:null}
+      </div>
     </Segment>);
   }
 
