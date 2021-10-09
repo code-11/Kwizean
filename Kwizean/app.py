@@ -4,6 +4,7 @@ from flask import Flask
 from flask import request
 from flask_cors import CORS
 from server.database.db_config import setup_db, db_clean_init, User, Restaurant, Review
+from sqlalchemy import func, desc, text
 import jwt
 
 
@@ -17,6 +18,42 @@ def create_app():
 
     # Only need to do this once?
     # db_clean_init()
+
+
+    @app.route('/api/getspecialreviews')
+    def get_special_reviews():
+        content_type = {'ContentType': 'application/json'}
+        #TODO: I'm fairly sure this, or something like it, should work.
+        #I think I'm just running into problems with Model vs Session calling syntax.
+        # qry = Review.query(func.max(Review.rating).label("max_score"),
+        #                     func.min(Review.rating).label("min_score"),
+        #                     )
+        # res = qry.one()
+        # max = res.max_score
+        # min = res.min_score
+
+        #Oh well, lets just sort it out on the back end.
+        all_reviews = Review.query.all()
+        max_rating_review = max(all_reviews, key=lambda review: review.rating)
+        min_rating_review = min(all_reviews, key=lambda review: review.rating)
+
+        newest_review = Review.query.order_by(Review.visit_date.desc()).first()
+
+        max_user = User.query.filter_by(id=max_rating_review.user_id).first()
+        min_user = User.query.filter_by(id=min_rating_review.user_id).first()
+        newest_user = User.query.filter_by(id=newest_review.user_id).first()
+
+        max_dict = max_rating_review.to_dict()
+        min_dict = min_rating_review.to_dict()
+        newest_dict = newest_review.to_dict()
+
+        max_dict["userName"] = max_user.full_name()
+        min_dict["userName"] = min_user.full_name()
+        newest_dict["userName"] = newest_user.full_name()
+
+        data = {'maxRatingReview': max_dict, 'minRatingReview': min_dict, 'newestReview': newest_dict}
+        return json.dumps({'success': True, 'data': data}), 200, content_type
+
 
 
     @app.route('/api/addreview', methods=['POST'])

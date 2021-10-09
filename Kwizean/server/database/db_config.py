@@ -41,6 +41,16 @@ class Review(db.Model):
         self.restaurant_id = restaurant_id
         self.user_id = user_id
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'date': str(self.visit_date),
+            'rating': self.rating,
+            'content': self.content,
+            'userId': self.user_id,
+            'restaurantId': self.restaurant_id,
+        }
+
     def insert(self):
         db.session.add(self)
         db.session.commit()
@@ -109,6 +119,9 @@ class User(db.Model):
         self.phone_number = phone_number
         self.password = password
         self.is_admin = is_admin
+
+    def full_name(self):
+        return self.first_name +" "+ self.last_name
 
     def to_dict(self):
         return {

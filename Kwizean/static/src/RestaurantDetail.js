@@ -10,7 +10,12 @@ export default class RestaurantDetail extends Component {
     this.state={
       addRestaurantModelOpen:false,
       addReviewModalOpen:false,
+      specialReviews:{},
     }
+  }
+
+  componentDidMount(){
+    this.getSpecialReviews();
   }
 
   //TODO: This is the same as the one in RestaurantList. Refactor
@@ -47,20 +52,42 @@ export default class RestaurantDetail extends Component {
     });
   }
 
+  getSpecialReviews(){
+    kzGet("getspecialreviews").then(response => {
+      if (response && response.success){
+        this.setState({
+          specialReviews:response.data,
+        });
+      }else{
+        console.log("Failed to get special reviews");
+      }
+    });
+  }
+
   addReview(data){
     kzPost("addreview",data).then(value => {
       if (value && value.success){
         this.setState({
           addReviewModalOpen:false,
-        });
+        },this.getSpecialReviews());
       }else{
         console.log("Failed to add review");
       }
     });
   }
 
+  createReview(reviewObj){
+    return (!reviewObj ? <p>No review found</p> :
+    <div>
+      <Rating defaultRating={reviewObj.rating} maxRating={5} disabled/>
+      <p>Visited {reviewObj.date}</p>
+      <p>{reviewObj.content}</p>
+      <p className="review-user">{reviewObj.userName}</p>
+    </div>);
+  }
+
   render(){
-    const {addRestaurantModelOpen,addReviewModalOpen} = this.state;
+    const {addRestaurantModelOpen,addReviewModalOpen,specialReviews} = this.state;
     const {userEmail, userAdmin, userId, setAppState, selectedRestaurantDetails}=this.props;
     const {name, location, description} = selectedRestaurantDetails;
     const userAdminStr=userAdmin ? " (Admin)" : "";
@@ -103,26 +130,11 @@ export default class RestaurantDetail extends Component {
 
             <Divider/>
             <h3> Latest Review </h3>
-            <div>
-              <Rating defaultRating={5} maxRating={5} disabled/>
-              <p>Visited July 18, 2021</p>
-              <p>But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful.</p>
-              <p className="review-user">John Goodbody Esq.</p>
-            </div>
+              {this.createReview(specialReviews.newestReview)}
             <h3> Highest Review </h3>
-            <div>
-              <Rating defaultRating={5} maxRating={5} disabled/>
-              <p>Visited July 18, 2021</p>
-              <p>Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? </p>
-              <p>John Goodbody Esq.</p>
-            </div>
+              {this.createReview(specialReviews.maxRatingReview)}
             <h3>Lowest Review </h3>
-            <div>
-              <Rating defaultRating={5} maxRating={5} disabled/>
-              <p>Visited July 18, 2021</p>
-              <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.</p>
-              <p>John Goodbody Esq.</p>
-            </div>
+              {this.createReview(specialReviews.minRatingReview)}
             <ReviewEditButton
               open={addReviewModalOpen}
               setParentState={(s)=>this.setState(s)}
