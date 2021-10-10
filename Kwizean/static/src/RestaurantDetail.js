@@ -9,7 +9,7 @@ export default class RestaurantDetail extends Component {
     super(props);
     this.state={
       addRestaurantModelOpen:false,
-      addReviewModalOpen:false,
+      addReviewModalOpen:null,
       reviews:{},
     }
   }
@@ -84,6 +84,19 @@ export default class RestaurantDetail extends Component {
     });
   }
 
+  updateReview(reviewObj){
+    kzPost("updatereview",reviewObj).then(value => {
+      if (value && value.success){
+        this.setState({
+          addReviewModalOpen:null
+        },this.getAppropriateReviews());
+
+      }else{
+        console.log("Failed to update review");
+      }
+    });
+  }
+
   deleteReview(reviewId){
     kzPost("deletereview",{reviewId}).then(value => {
       if (value && value.success){
@@ -107,7 +120,8 @@ export default class RestaurantDetail extends Component {
   }
 
   createReview(reviewObj){
-    const {userAdmin} = this.props;
+    const {addReviewModalOpen} = this.state;
+    const {userAdmin,selectedRestaurantDetails,userId} = this.props;
     return (!reviewObj ? <p>No review found</p> :
     <Segment>
       <div className="review-box">
@@ -119,7 +133,13 @@ export default class RestaurantDetail extends Component {
         </div>
         {userAdmin ?
         <div className="review-action-box">
-          <Button className="review-edit-btn"> Edit </Button>
+          <ReviewEditButton
+            open={reviewObj.id==addReviewModalOpen}
+            setParentState={(s)=>this.setState(s)}
+            reviewObj={reviewObj}
+            onSubmit={(data)=>this.updateReview({...data,...{id:reviewObj.id}})}
+            actionText={"Edit"}
+            buttonClass={"review-edit-btn"}/>
           <Button className="review-delete-btn" onClick={()=>{this.deleteReview(reviewObj.id)}}> Delete </Button>
         </div>:null}
       </div>
@@ -139,7 +159,7 @@ export default class RestaurantDetail extends Component {
     const userAdminStr=userAdmin ? " (Admin)" : "";
 
     const userReviewSection=
-      <div>
+      <div className="review-section">
         <h3> Latest Review </h3>
           {this.createReview(reviews.newestReview)}
         <h3> Highest Review </h3>
@@ -147,22 +167,22 @@ export default class RestaurantDetail extends Component {
         <h3>Lowest Review </h3>
           {this.createReview(reviews.minRatingReview)}
         <ReviewEditButton
-          open={addReviewModalOpen}
+          open={addReviewModalOpen==-1}
           setParentState={(s)=>this.setState(s)}
           onSubmit={(data)=>this.addReview({...data, ...{userId,restaurantId:selectedRestaurantDetails.id}})}
           actionText={"Add Review"}
-          buttonId={"review-add-btn"}/>
+          buttonClass={"review-add-btn"}/>
       </div>
 
     const adminReviewSection=
-        <div>
+        <div className="review-section">
           <h3> All Reviews </h3>
           <ReviewEditButton
-            open={addReviewModalOpen}
+            open={addReviewModalOpen==-1}
             setParentState={(s)=>this.setState(s)}
             onSubmit={(data)=>this.addReview({...data, ...{userId,restaurantId:selectedRestaurantDetails.id}})}
             actionText={"Add Review"}
-            buttonId={"review-add-btn"}/>
+            buttonClass={"review-add-btn"}/>
           <div>
             {!this.isObject(reviews) ? reviews.map((rev)=>this.createReview(rev)) : null}
           </div>

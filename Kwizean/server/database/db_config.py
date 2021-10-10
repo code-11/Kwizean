@@ -51,6 +51,12 @@ class Review(db.Model):
             'restaurantId': self.restaurant_id,
         }
 
+    def kz_update(self, date, rating, content):
+        setattr(self, 'visit_date', date)
+        setattr(self, 'rating', rating)
+        setattr(self, 'content', content)
+        db.session.commit()
+
     def insert(self):
         db.session.add(self)
         db.session.commit()

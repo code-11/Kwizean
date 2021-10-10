@@ -23,13 +23,15 @@ a{
   text-align: center;
 }
 
-#review-add-btn{
+.ui.label.review-add-btn{
   background-color:#FF8000;
   color: white;
   cursor:pointer;
   display:block;
   margin:25px auto 25px auto;
   width: 30%;
+  text-align:center;
+  font-size: 14px;
 }
 
 .review-box{
@@ -47,8 +49,12 @@ a{
   gap: 20px;
 }
 
-.review-action-box > .review-edit-btn{
-  background-color:#f3f3f3 !important;
+.ui.label.review-edit-btn{
+  font-size:14px;
+  text-align:center;
+  background-color:#f3f3f3;
+  padding: 11px 21px;
+  cursor:pointer;
 }
 
 .review-action-box > .review-delete-btn{

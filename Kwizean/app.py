@@ -19,6 +19,20 @@ def create_app():
     # Only need to do this once?
     # db_clean_init()
 
+    @app.route("/api/updatereview", methods=['POST'])
+    def update_review():
+        content_type = {'ContentType': 'application/json'}
+        review_id = request.json.get("id")
+        rating = request.json.get("rating")
+        date = request.json.get("date")
+        content = request.json.get("content")
+        matching_review = Review.query.filter_by(id=review_id).first()
+        if matching_review is None:
+            return response(False, "No review with that ID", 400, content_type)
+        else:
+            matching_review.kz_update(date, rating, content)
+            return json.dumps({'success': True}), 200, content_type
+
     @app.route("/api/deletereview", methods=['POST'])
     def delete_review():
         content_type = {'ContentType': 'application/json'}

@@ -18,23 +18,23 @@ export default class ReviewEditButton extends Component{
   }
 
   render(){
-    const {open, setParentState, onSubmit, actionText, buttonId, reviewObj} = this.props;
+    const {open, setParentState, onSubmit, actionText, buttonClass, reviewObj} = this.props;
     return <Modal
       open={open}
-      trigger={<Label id={buttonId} onClick={()=>setParentState({addReviewModalOpen:true})}>{actionText}</Label>}
+      trigger={<Label className={buttonClass} onClick={()=>setParentState({addReviewModalOpen:(reviewObj ? reviewObj.id: -1)})}>{actionText}</Label>}
     >
       <Modal.Header>{actionText}</Modal.Header>
       <Modal.Content>
         <Form onSubmit={(e)=>{ onSubmit(this.extractData(e)) }}>
           <Form.Field>
             <label> Rating 1-5 </label>
-            <input type="number" id="quantity" name="rating" min="1" max="5"/>
+            <input type="number" id="quantity" name="rating" min="1" max="5" defaultValue={reviewObj ? reviewObj.rating : 5 }/>
           </Form.Field>
           <Form.Field>
-            <input type="date" name="date"/>
+            <input type="date" name="date" defaultValue={reviewObj ? reviewObj.date : new Date().toJSON() }/>
           </Form.Field>
-          <Form.Field required control={TextArea} name="content" label='Content' width={8}  placeholder='Tell us how you felt about this restaurant...'/>
-          <Button color='black' onClick={ ()=>setParentState({addReviewModalOpen:false}) }> Cancel </Button>
+          <Form.Field required control={TextArea} name="content" label='Content' width={8} defaultValue={reviewObj ? reviewObj.content : ""}  placeholder='Tell us how you felt about this restaurant...'/>
+          <Button color='black' onClick={ ()=>setParentState({addReviewModalOpen:null}) }> Cancel </Button>
           <Button id="review-add-modal-confirm" content="Submit Restaurant" type="submit"/>
         </Form>
       </Modal.Content>
