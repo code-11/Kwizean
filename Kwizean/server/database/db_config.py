@@ -140,6 +140,14 @@ class User(db.Model):
             'phoneNumber': self.phone_number
         }
 
+    def kz_update(self, is_admin, first_name, last_name, email, phone_number):
+        setattr(self, 'is_admin', is_admin)
+        setattr(self, 'first_name', first_name)
+        setattr(self, 'last_name', last_name)
+        setattr(self, 'email', email)
+        setattr(self, 'phone_number', phone_number)
+        db.session.commit()
+
     def insert(self):
         db.session.add(self)
         db.session.commit()

@@ -158,7 +158,7 @@ def create_app():
                 new_restaurant.insert()
                 return json.dumps({'success': True}), 200, content_type
         else:
-            return response(False, "Failed to make restaurant", 400, content_type)
+            return response(False, "Failed to make restaurant", 405, content_type)
 
     @app.route('/api/deleterestaurant', methods=['POST'])
     def delete_restaurant():
@@ -175,7 +175,29 @@ def create_app():
                     matching_restaurant.delete()
                     return json.dumps({'success': True}), 200, content_type
         else:
-            return response(False, "Failed to delete restaurant", 400, content_type)
+            return response(False, "Failed to delete restaurant", 405, content_type)
+
+    @app.route('/api/updateuser', methods=['POST'])
+    def update_user():
+        content_type = {'ContentType': 'application/json'}
+        if request.method == 'POST':
+            user_id = request.json.get("userId")
+            first_name = request.json.get("firstName")
+            last_name = request.json.get("lastName")
+            phone_number = request.json.get("phoneNumber")
+            email = request.json.get("email")
+            admin = request.json.get("admin", False)
+            if None in [user_id, first_name, last_name, phone_number, email, admin]:
+                return response(False, "Failed to update user", 400, content_type)
+            else:
+                matching_user = User.query.filter_by(id=user_id).first()
+                if matching_user is None:
+                    return response(False, "Failed to find user", 400, content_type)
+                else:
+                    matching_user.kz_update(admin, first_name, last_name, email, phone_number)
+                    return json.dumps({'success': True}), 200, content_type
+        else:
+            return response(False, "Incorrect Request Method", 405, content_type)
 
     @app.route('/api/deleteuser', methods=['POST'])
     def delete_user():
@@ -184,12 +206,12 @@ def create_app():
             user_id = request.json.get("userId")
             matching_user = User.query.filter_by(id=user_id).first()
             if matching_user is None:
-                return response(False, "Failed to delete user", 400, content_type)
+                return response(False, "Failed to find user", 400, content_type)
             else:
                 matching_user.delete()
                 return json.dumps({'success': True}), 200, content_type
         else:
-            return response(False, "Incorrect Request Method", 400, content_type)
+            return response(False, "Incorrect Request Method", 405, content_type)
 
     @app.route('/api/getusers')
     def get_users():
@@ -214,7 +236,7 @@ def create_app():
                 else:
                     return json.dumps({'success': True, 'userId': matching_user.id}), 200, content_type
         else:
-            return response(False, "Incorrect Login", 400, content_type)
+            return response(False, "Incorrect Login", 405, content_type)
 
     @app.route('/api/signup', methods=['POST'])
     def signup():
@@ -234,7 +256,7 @@ def create_app():
                 new_user.insert()
                 return json.dumps({'success': True}), 200, content_type
         else:
-            return response(False, "Incomplete Signup", 400, content_type)
+            return response(False, "Incomplete Signup", 405, content_type)
 
     @app.route('/icons/kwizeanFull105.png')
     def block105():

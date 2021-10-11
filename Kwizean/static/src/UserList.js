@@ -1,5 +1,6 @@
 import { Button, Checkbox, Card, Form, Label, Rating, Icon, Modal, Header, Loader, Segment } from 'semantic-ui-react'
 import React, { Component} from "react";
+import UserEditButton from "./UserEditButton";
 import {kzPost, kzGet} from "./Actions";
 
 export default class Userlist extends Component{
@@ -7,6 +8,7 @@ export default class Userlist extends Component{
     super(props);
     this.state={
       users:null,
+      editUserModalId:null,
     }
   }
 
@@ -36,7 +38,21 @@ export default class Userlist extends Component{
     });
   }
 
+  updateUser(userObj){
+    kzPost("updateuser",userObj).then(response => {
+      if (response && response.success){
+        this.setState({
+          editUserModalId:null
+        },
+        this.getUsers());
+      }else{
+        console.log("Failed to update user");
+      }
+    });
+  }
+
   createUser(userObj){
+    const {editUserModalId} = this.state;
     const {userId} = this.props;
     return <Segment>
       <div className="review-box">
@@ -47,7 +63,12 @@ export default class Userlist extends Component{
           <p><span style={{fontWeight:"bold"}}>Phone Number: </span>{userObj.phoneNumber}</p>
         </div>
         <div className="review-action-box">
-          <Button className="review-edit-btn"> Edit </Button>
+          <UserEditButton
+              buttonClass="review-edit-btn"
+              open={userObj.id==editUserModalId}
+              setParentState={(s)=>this.setState(s)}
+              userObj={userObj}
+              onSubmit={(data)=>this.updateUser({...data,...{userId:userObj.id}})} />
           <Button className="review-delete-btn" onClick={()=>{
             this.deleteUser(userObj.id);
             if (userObj.id ==userId){
