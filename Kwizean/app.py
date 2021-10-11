@@ -45,22 +45,27 @@ def create_app():
             matching_review.delete()
             return json.dumps({'success': True}), 200, content_type
 
-    @app.route("/api/getreviews")
+    @app.route("/api/getreviews", methods=['POST'])
     def get_reviews():
         content_type = {'ContentType': 'application/json'}
-        all_reviews = Review.query.join(User, User.id == Review.user_id) \
-            .add_columns(User.first_name, User.last_name) \
-            .order_by(Review.visit_date.desc()) \
-            .all()
+        restaurant_id = request.json.get("restaurantId")
+        if request.method == 'POST':
+            all_reviews = Review.query.filter_by(restaurant_id=restaurant_id) \
+                .join(User, User.id == Review.user_id) \
+                .add_columns(User.first_name, User.last_name) \
+                .order_by(Review.visit_date.desc()) \
+                .all()
 
-        def rev_tup_to_dict(rev_tup):
-            rev, first_name, last_name = rev_tup
-            rev_dict = rev.to_dict()
-            rev_dict["userFullName"] = first_name + " " + last_name
-            return rev_dict
+            def rev_tup_to_dict(rev_tup):
+                rev, first_name, last_name = rev_tup
+                rev_dict = rev.to_dict()
+                rev_dict["userFullName"] = first_name + " " + last_name
+                return rev_dict
 
-        data = list(map(rev_tup_to_dict, all_reviews))
-        return json.dumps({'success': True, 'data': data}), 200, content_type
+            data = list(map(rev_tup_to_dict, all_reviews))
+            return json.dumps({'success': True, 'data': data}), 200, content_type
+        else:
+            return response(False, "Wrong request type", 405, content_type)
 
     @app.route('/api/getspecialreviews')
     def get_special_reviews():
@@ -74,8 +79,10 @@ def create_app():
         # max = res.max_score
         # min = res.min_score
 
+        restaurant_id = request.json.get("restaurantId")
+
         # Oh well, lets just sort it out on the back end.
-        all_reviews = Review.query.all()
+        all_reviews = Review.query.filter_by(id=restaurant_id).all()
         max_rating_review = max(all_reviews, key=lambda review: review.rating)
         min_rating_review = min(all_reviews, key=lambda review: review.rating)
 
@@ -131,17 +138,43 @@ def create_app():
     def get_restaurant():
         content_type = {'ContentType': 'application/json'}
         restaurant_id = request.json.get("id")
+
+        avg_rating,num_reviews = Review.query.with_entities(func.avg(Review.rating),
+                                                     func.count(Review.id)).filter_by(restaurant_id=restaurant_id).first()
+
         matching_restaurant = Restaurant.query.filter_by(id=restaurant_id).first()
         if matching_restaurant is None:
             return response(False, "No restaurant with that ID", 400, content_type)
         else:
-            return json.dumps({'success': True, 'data': matching_restaurant.to_dict()}), 200, content_type
+            restaurant_dict = matching_restaurant.to_dict()
+            restaurant_dict["avgRating"] = float(avg_rating)
+            restaurant_dict["numReviews"] = int(num_reviews)
+            return json.dumps({'success': True, 'data': restaurant_dict}), 200, content_type
 
     @app.route('/api/getrestaurants')
     def get_restaurants():
         content_type = {'ContentType': 'application/json'}
+
+        # We need to combine restaurants with their average score
+        # select * from restaurants t1 inner join (select avg(rating), restaurant_id from reviews group by restaurant_id) t2 on t1.id=t2.restaurant_id
+        # Can't quite seem to express this is sqlalchemy because of the intermediate table, so I'm going to split it into two queries and then combine when dictionaryifying them.
+
+        # Lets get a collection of avg_ratings indexed by restaurantId
+        all_avg_reviews = Review.query.with_entities(Review.restaurant_id, func.avg(Review.rating), func.count(Review.id)).group_by(Review.restaurant_id).all()
+        avg_rating_table = {id: (avg_rating, num) for id, avg_rating, num in all_avg_reviews}
+
+        # Then get all the restaurants
         all_restaurants = Restaurant.query.all()
-        jsonified_restaurants = list(map(lambda r: r.to_dict(), all_restaurants))
+
+        # Then add avg_rating to all the restaurants
+        def add_rating_and_dict(restaurant):
+            restaurant_dict = restaurant.to_dict()
+            avg_rating, num=avg_rating_table.get(restaurant.id)
+            restaurant_dict["avgRating"] = float(avg_rating)
+            restaurant_dict["numReviews"] = num
+            return restaurant_dict
+
+        jsonified_restaurants = list(map(lambda r: add_rating_and_dict(r), all_restaurants))
         return json.dumps({'success': True, 'data': jsonified_restaurants}), 200, content_type
 
     @app.route('/api/createrestaurant', methods=['POST'])

@@ -107,7 +107,6 @@ class Restaurant(db.Model):
     def update(self):
         db.session.commit()
 
-
 class User(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
@@ -116,7 +115,7 @@ class User(db.Model):
     last_name = Column(String(80))
     email = Column(String(80))
     phone_number = Column(String(14))
-    password = Column(String(80))
+    password = Column(Text())
 
     def __init__(self, first_name, last_name, email, phone_number, password, is_admin=False):
         self.first_name = first_name

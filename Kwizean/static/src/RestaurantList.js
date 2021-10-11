@@ -93,9 +93,7 @@ export default class RestaurantList extends Component {
   // createCard(name, location, desc, avgRating, numReviews, tagList){
   createCard(restaurantObj){
     const {setAppState} = this.props;
-    const {name,location,description,}=restaurantObj;
-    const avgRating=3;
-    const numReviews=105;
+    const {name,location,description,avgRating,numReviews}=restaurantObj;
     const tagContainer = null;// <Card.Content extra>{tagList.map((tag)=><Label>{tag}</Label>)}</Card.Content>;
 
     const possibleDeleteBtn = !this.props.userAdmin ? null : this.createDeleteRestaurantButton(restaurantObj);
@@ -107,7 +105,7 @@ export default class RestaurantList extends Component {
             <Card.Meta>{location}</Card.Meta>
             <Card.Description>{description}</Card.Description>
             <Rating className="restaurant-card-rating" defaultRating={avgRating} maxRating={5} disabled/>
-            <p className="restaurant-card-rating-label"> {avgRating + ("  ("+numReviews+" reviews)")} </p>
+            <p className="restaurant-card-rating-label"> {avgRating.toFixed(2) + ("  ("+numReviews+" reviews)")} </p>
           </Card.Content>
           {tagContainer}
           <Card.Content extra>

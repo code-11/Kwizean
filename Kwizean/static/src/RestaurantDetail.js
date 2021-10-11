@@ -53,15 +53,16 @@ export default class RestaurantDetail extends Component {
   }
 
   getAppropriateReviews(){
+    const restaurantId = this.props.selectedRestaurantDetails.id;
     if (this.props.userAdmin){
-      this.getAllReviews();
+      this.getAllReviews(restaurantId);
     }else{
-      this.getSpecialReviews();
+      this.getSpecialReviews(restaurantId);
     }
   }
 
-  getAllReviews(){
-    kzGet("getreviews").then(response => {
+  getAllReviews(restaurantId){
+    kzPost("getreviews",{restaurantId}).then(response => {
       if (response && response.success){
         this.setState({
           reviews:response.data,
@@ -72,8 +73,8 @@ export default class RestaurantDetail extends Component {
     });
   }
 
-  getSpecialReviews(){
-    kzGet("getspecialreviews").then(response => {
+  getSpecialReviews(restaurantId){
+    kzPost("getspecialreviews",{restaurantId}).then(response => {
       if (response && response.success){
         this.setState({
           reviews:response.data,
@@ -155,7 +156,7 @@ export default class RestaurantDetail extends Component {
   render(){
     const {addRestaurantModelOpen,addReviewModalOpen,reviews} = this.state;
     const {userEmail, userAdmin, userId, setAppState, selectedRestaurantDetails}=this.props;
-    const {name, location, description} = selectedRestaurantDetails;
+    const {name, location, description, avgRating, numReviews} = selectedRestaurantDetails;
     const userAdminStr=userAdmin ? " (Admin)" : "";
 
     const userReviewSection=
@@ -205,8 +206,8 @@ export default class RestaurantDetail extends Component {
             <h1 className="detail-header"> {name} </h1>
             <div className="detail-rating-location-box">
               <div className="detail-rating-box">
-                <Rating defaultRating={3} maxRating={5} disabled/>
-                <p className="restaurant-card-rating-label"> {3.5 + ("  ("+150+" reviews)")} </p>
+                <Rating defaultRating={avgRating} maxRating={5} disabled/>
+                <p className="restaurant-card-rating-label"> {avgRating.toFixed(2) + ("  ("+numReviews+" reviews)")} </p>
               </div>
               <h4 className="detail-location"> {location}</h4>
             </div>
