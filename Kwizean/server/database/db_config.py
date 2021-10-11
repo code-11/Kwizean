@@ -130,14 +130,14 @@ class User(db.Model):
         return self.first_name +" "+ self.last_name
 
     def to_dict(self):
+        # No password. We don't want to send that down!
         return {
             'id': self.id,
-            'is_admin': self.is_admin,
-            'firstName': self.title,
-            'lastName': self.release_date,
+            'isAdmin': self.is_admin,
+            'firstName': self.first_name,
+            'lastName': self.last_name,
             'email': self.email,
-            'phoneNumber': self.phone_number,
-            'password': self.password
+            'phoneNumber': self.phone_number
         }
 
     def insert(self):

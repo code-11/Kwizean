@@ -179,6 +179,13 @@ def create_app():
         else:
             return response(False, "Failed to delete restaurant", 400, content_type)
 
+    @app.route('/api/getusers')
+    def get_users():
+        content_type = {'ContentType': 'application/json'}
+        all_users = User.query.all()
+        data = list(map(lambda user: user.to_dict(), all_users))
+        return json.dumps({'success': True, "data": data}), 200, content_type
+
     @app.route('/api/login', methods=['POST'])
     def login():
         content_type = {'ContentType': 'application/json'}

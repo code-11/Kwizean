@@ -2,6 +2,7 @@ import './App.css';
 import SignInUp from "./SignInUp";
 import RestaurantList from "./RestaurantList";
 import RestaurantDetail from "./RestaurantDetail";
+import UserList from "./UserList"
 import React, { Component } from "react";
 
 export default class App extends Component {
@@ -29,6 +30,8 @@ export default class App extends Component {
       pageToRender = <RestaurantList userEmail={this.state.userEmail} userAdmin={this.state.userAdmin} setAppState={this.setAppState}/>
     }else if (this.state.pageState == "restaurant-detail"){
       pageToRender = <RestaurantDetail userEmail={this.state.userEmail} userAdmin={this.state.userAdmin} userId={this.state.userId} setAppState={this.setAppState} selectedRestaurantDetails={this.state.selectedRestaurantDetails}/>
+    }else if (this.state.pageState == "user-list"){
+      pageToRender = <UserList userEmail={this.state.userEmail} userAdmin={this.state.userAdmin} setAppState={this.setAppState}/>
     }
     return (
       <div className="App">

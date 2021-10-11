@@ -121,7 +121,7 @@ export default class RestaurantList extends Component {
 
   render(){
 
-    const {userEmail, userAdmin}=this.props;
+    const {userEmail, userAdmin, setAppState}=this.props;
     const {restaurants, fetchingRestaurants,addRestaurantModelOpen} = this.state;
     const restaurantInfo=restaurants.map((r)=>this.createCard(r));
 
@@ -152,7 +152,10 @@ export default class RestaurantList extends Component {
           </Card.Group>
         }
       </div>
-      {possibleAddRestaurantBtn}
+      <div className="admin-actions-panel">
+        {possibleAddRestaurantBtn}
+        <Button onClick={()=>{setAppState({pageState:"user-list"})}}> Edit Users </Button>
+      </div>
     </div>;
   }
 }

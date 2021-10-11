@@ -49,6 +49,7 @@ a{
   gap: 20px;
 }
 
+.ui.button.review-edit-btn
 .ui.label.review-edit-btn{
   font-size:14px;
   text-align:center;
@@ -57,8 +58,9 @@ a{
   cursor:pointer;
 }
 
-.review-action-box > .review-delete-btn{
-  background-color:#ffe8e8 !important;
+.ui.button.review-delete-btn,
+.ui.label.review-delete-btn{
+  background-color:#ffe8e8;
 }
 
 .review-user{
@@ -125,11 +127,14 @@ a{
 #restaurant-add-btn{
   background-color:#FF8000;
   color: white;
+  cursor:pointer;
+  font-size:18px;
+}
+
+.admin-actions-panel{
   position: fixed;
   bottom: 40px;
   left: 30px;
-  cursor:pointer;
-  font-size:18px;
 }
 
 .restaurant-page{
