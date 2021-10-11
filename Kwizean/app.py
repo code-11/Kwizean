@@ -147,8 +147,8 @@ def create_app():
             return response(False, "No restaurant with that ID", 400, content_type)
         else:
             restaurant_dict = matching_restaurant.to_dict()
-            restaurant_dict["avgRating"] = float(avg_rating)
-            restaurant_dict["numReviews"] = int(num_reviews)
+            restaurant_dict["avgRating"] = float(avg_rating) if avg_rating is not None else 0
+            restaurant_dict["numReviews"] = int(num_reviews) if num_reviews is not None else 0
             return json.dumps({'success': True, 'data': restaurant_dict}), 200, content_type
 
     @app.route('/api/getrestaurants')
@@ -169,7 +169,7 @@ def create_app():
         # Then add avg_rating to all the restaurants
         def add_rating_and_dict(restaurant):
             restaurant_dict = restaurant.to_dict()
-            avg_rating, num=avg_rating_table.get(restaurant.id)
+            avg_rating, num=avg_rating_table.get(restaurant.id, (0, 0))
             restaurant_dict["avgRating"] = float(avg_rating)
             restaurant_dict["numReviews"] = num
             return restaurant_dict

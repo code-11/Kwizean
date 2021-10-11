@@ -101,6 +101,7 @@ export default class RestaurantDetail extends Component {
   deleteReview(reviewId){
     kzPost("deletereview",{reviewId}).then(value => {
       if (value && value.success){
+        this.setSelectedRestaurantDetails(this.props.selectedRestaurantDetails.id);
         this.getAppropriateReviews();
       }else{
         console.log("Failed to delete review");
@@ -113,7 +114,10 @@ export default class RestaurantDetail extends Component {
       if (value && value.success){
         this.setState({
           addReviewModalOpen:false,
-        },this.getAppropriateReviews());
+        },()=>{
+          this.setSelectedRestaurantDetails(this.props.selectedRestaurantDetails.id);
+          this.getAppropriateReviews();
+        });
       }else{
         console.log("Failed to add review");
       }

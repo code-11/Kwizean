@@ -75,7 +75,7 @@ class Restaurant(db.Model):
     name = Column(String(80))
     location = Column(String(80))
     description = Column(Text())
-    children = relationship("Review")
+    children = relationship("Review", cascade="all, delete")
 
     def __init__(self, name, location, description):
         self.name = name
