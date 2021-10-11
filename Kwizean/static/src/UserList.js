@@ -26,7 +26,18 @@ export default class Userlist extends Component{
     });
   }
 
+  deleteUser(userId){
+    kzPost("deleteuser",{userId}).then(response => {
+      if (response && response.success){
+        this.getUsers();
+      }else{
+        console.log("Failed to delete user");
+      }
+    });
+  }
+
   createUser(userObj){
+    const {userId} = this.props;
     return <Segment>
       <div className="review-box">
         <div>
@@ -37,7 +48,14 @@ export default class Userlist extends Component{
         </div>
         <div className="review-action-box">
           <Button className="review-edit-btn"> Edit </Button>
-          <Button className="review-delete-btn"> Delete </Button>
+          <Button className="review-delete-btn" onClick={()=>{
+            this.deleteUser(userObj.id);
+            if (userObj.id ==userId){
+              setAppState({
+                  pageState:"prelogin",
+              });
+            }
+          }}> Delete </Button>
         </div>
       </div>
     </Segment>

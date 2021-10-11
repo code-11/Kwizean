@@ -31,7 +31,7 @@ export default class App extends Component {
     }else if (this.state.pageState == "restaurant-detail"){
       pageToRender = <RestaurantDetail userEmail={this.state.userEmail} userAdmin={this.state.userAdmin} userId={this.state.userId} setAppState={this.setAppState} selectedRestaurantDetails={this.state.selectedRestaurantDetails}/>
     }else if (this.state.pageState == "user-list"){
-      pageToRender = <UserList userEmail={this.state.userEmail} userAdmin={this.state.userAdmin} setAppState={this.setAppState}/>
+      pageToRender = <UserList userEmail={this.state.userEmail} userAdmin={this.state.userAdmin} userId={this.state.userId} setAppState={this.setAppState}/>
     }
     return (
       <div className="App">

@@ -11,6 +11,7 @@ import jwt
 def response(success, msg, code, content_type):
     return json.dumps({'success': success, 'message': msg}), code, content_type
 
+
 def create_app():
     app = Flask(__name__, static_folder='static')
     setup_db(app)
@@ -47,26 +48,25 @@ def create_app():
     @app.route("/api/getreviews")
     def get_reviews():
         content_type = {'ContentType': 'application/json'}
-        all_reviews = Review.query.join(User, User.id == Review.user_id)\
-            .add_columns(User.first_name, User.last_name)\
-            .order_by(Review.visit_date.desc())\
+        all_reviews = Review.query.join(User, User.id == Review.user_id) \
+            .add_columns(User.first_name, User.last_name) \
+            .order_by(Review.visit_date.desc()) \
             .all()
 
         def rev_tup_to_dict(rev_tup):
             rev, first_name, last_name = rev_tup
             rev_dict = rev.to_dict()
-            rev_dict["userFullName"] = first_name+" "+last_name
+            rev_dict["userFullName"] = first_name + " " + last_name
             return rev_dict
 
-        data=list(map(rev_tup_to_dict, all_reviews))
+        data = list(map(rev_tup_to_dict, all_reviews))
         return json.dumps({'success': True, 'data': data}), 200, content_type
-
 
     @app.route('/api/getspecialreviews')
     def get_special_reviews():
         content_type = {'ContentType': 'application/json'}
-        #TODO: I'm fairly sure this, or something like it, should work.
-        #I think I'm just running into problems with Model vs Session calling syntax.
+        # TODO: I'm fairly sure this, or something like it, should work.
+        # I think I'm just running into problems with Model vs Session calling syntax.
         # qry = Review.query(func.max(Review.rating).label("max_score"),
         #                     func.min(Review.rating).label("min_score"),
         #                     )
@@ -74,7 +74,7 @@ def create_app():
         # max = res.max_score
         # min = res.min_score
 
-        #Oh well, lets just sort it out on the back end.
+        # Oh well, lets just sort it out on the back end.
         all_reviews = Review.query.all()
         max_rating_review = max(all_reviews, key=lambda review: review.rating)
         min_rating_review = min(all_reviews, key=lambda review: review.rating)
@@ -95,8 +95,6 @@ def create_app():
 
         data = {'maxRatingReview': max_dict, 'minRatingReview': min_dict, 'newestReview': newest_dict}
         return json.dumps({'success': True, 'data': data}), 200, content_type
-
-
 
     @app.route('/api/addreview', methods=['POST'])
     def add_review():
@@ -179,6 +177,20 @@ def create_app():
         else:
             return response(False, "Failed to delete restaurant", 400, content_type)
 
+    @app.route('/api/deleteuser', methods=['POST'])
+    def delete_user():
+        content_type = {'ContentType': 'application/json'}
+        if request.method == 'POST':
+            user_id = request.json.get("userId")
+            matching_user = User.query.filter_by(id=user_id).first()
+            if matching_user is None:
+                return response(False, "Failed to delete user", 400, content_type)
+            else:
+                matching_user.delete()
+                return json.dumps({'success': True}), 200, content_type
+        else:
+            return response(False, "Incorrect Request Method", 400, content_type)
+
     @app.route('/api/getusers')
     def get_users():
         content_type = {'ContentType': 'application/json'}
@@ -206,7 +218,7 @@ def create_app():
 
     @app.route('/api/signup', methods=['POST'])
     def signup():
-        content_type={'ContentType': 'application/json'}
+        content_type = {'ContentType': 'application/json'}
         if request.method == 'POST':
             first_name = request.json.get("firstName")
             last_name = request.json.get("lastName")
@@ -241,6 +253,7 @@ def create_app():
         return app.send_static_file("./index.html")
 
     return app
+
 
 if __name__ == '__main__':
     app = create_app()
