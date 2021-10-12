@@ -133,12 +133,15 @@ export default class RestaurantList extends Component {
       buttonId="restaurant-add-btn"
       />;
 
+    const possibleUserEditBtn = !userAdmin ? null :
+      <Button onClick={()=>{setAppState({pageState:"user-list"})}}> Edit Users </Button>
+
     return <div className="restaurant-page">
       <div className="login-banner">
         <img className="login-banner-logo" src="icons/kwizeanFull105.png"/>
         <div className="banner-user-label-group">
-          <Icon name="user"/>
           <p className="banner-user-label"> {userEmail+userAdminStr}</p>
+          <a onClick={()=>setAppState({pageState:"prelogin"})}> Log Out </a>
         </div>
       </div>
       <div className="restaurant-grid">
@@ -152,7 +155,7 @@ export default class RestaurantList extends Component {
       </div>
       <div className="admin-actions-panel">
         {possibleAddRestaurantBtn}
-        <Button onClick={()=>{setAppState({pageState:"user-list"})}}> Edit Users </Button>
+        {possibleUserEditBtn}
       </div>
     </div>;
   }

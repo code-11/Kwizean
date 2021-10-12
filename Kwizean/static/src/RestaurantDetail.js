@@ -115,7 +115,6 @@ export default class RestaurantDetail extends Component {
         this.setState({
           addReviewModalOpen:false,
         },()=>{
-          this.setSelectedRestaurantDetails(this.props.selectedRestaurantDetails.id);
           this.getAppropriateReviews();
         });
       }else{
@@ -131,7 +130,7 @@ export default class RestaurantDetail extends Component {
     <Segment>
       <div className="review-box">
         <div className="review-content-box">
-          <Rating defaultRating={reviewObj.rating} maxRating={5} disabled/>
+          <p> {"Rating: ("+reviewObj.rating+"/5)"}</p>
           <p>Visited {reviewObj.date}</p>
           <p>{reviewObj.content}</p>
           <p className="review-user">{reviewObj.userFullName}</p>
@@ -202,8 +201,8 @@ export default class RestaurantDetail extends Component {
               <img className="login-banner-logo" src="icons/kwizeanFull105.png"/>
             </a>
             <div className="banner-user-label-group">
-              <Icon name="user"/>
               <p className="banner-user-label"> {userEmail+userAdminStr}</p>
+              <a onClick={()=>setAppState({pageState:"prelogin"})}> Log Out </a>
             </div>
           </div>
           <div className="detail-pane">

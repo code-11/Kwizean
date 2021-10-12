@@ -1,5 +1,7 @@
 import json
 import os
+
+from passlib.hash import pbkdf2_sha256
 from flask import Flask
 from flask import request
 from flask_cors import CORS
@@ -67,7 +69,7 @@ def create_app():
         else:
             return response(False, "Wrong request type", 405, content_type)
 
-    @app.route('/api/getspecialreviews')
+    @app.route('/api/getspecialreviews',methods=['POST'])
     def get_special_reviews():
         content_type = {'ContentType': 'application/json'}
         # TODO: I'm fairly sure this, or something like it, should work.
@@ -82,11 +84,11 @@ def create_app():
         restaurant_id = request.json.get("restaurantId")
 
         # Oh well, lets just sort it out on the back end.
-        all_reviews = Review.query.filter_by(id=restaurant_id).all()
+        all_reviews = Review.query.filter_by(restaurant_id=restaurant_id).all()
         max_rating_review = max(all_reviews, key=lambda review: review.rating)
         min_rating_review = min(all_reviews, key=lambda review: review.rating)
 
-        newest_review = Review.query.order_by(Review.visit_date.desc()).first()
+        newest_review = Review.query.filter_by(restaurant_id=restaurant_id).order_by(Review.visit_date.desc()).first()
 
         max_user = User.query.filter_by(id=max_rating_review.user_id).first()
         min_user = User.query.filter_by(id=min_rating_review.user_id).first()
@@ -175,6 +177,7 @@ def create_app():
             return restaurant_dict
 
         jsonified_restaurants = list(map(lambda r: add_rating_and_dict(r), all_restaurants))
+        jsonified_restaurants.sort(reverse=True,key=lambda restaurant: restaurant["avgRating"])
         return json.dumps({'success': True, 'data': jsonified_restaurants}), 200, content_type
 
     @app.route('/api/createrestaurant', methods=['POST'])
@@ -263,11 +266,15 @@ def create_app():
             if email is None or password is None:
                 return response(False, "Incorrect Login", 400, content_type)
             else:
-                matching_user = User.query.filter_by(email=email, password=password, is_admin=admin).first()
+                matching_user = User.query.filter_by(email=email, is_admin=admin).first()
                 if matching_user is None:
-                    return response(False, "Incorrect Login", 403, content_type)
+                    return response(False, "Incorrect Login", 400, content_type)
                 else:
-                    return json.dumps({'success': True, 'userId': matching_user.id}), 200, content_type
+                    hashed= matching_user.password
+                    if pbkdf2_sha256.verify(password, hashed):
+                        return json.dumps({'success': True, 'userId': matching_user.id}), 200, content_type
+                    else:
+                        return response(False, "Incorrect Login", 403, content_type)
         else:
             return response(False, "Incorrect Login", 405, content_type)
 
@@ -285,7 +292,8 @@ def create_app():
                 return response(False, "Incomplete Signup", 400, content_type)
 
             else:
-                new_user = User(first_name, last_name, email, phone_number, password, admin)
+                pwhash = pbkdf2_sha256.hash(password)
+                new_user = User(first_name, last_name, email, phone_number, pwhash, admin)
                 new_user.insert()
                 return json.dumps({'success': True}), 200, content_type
         else:

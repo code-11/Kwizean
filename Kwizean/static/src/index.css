@@ -49,7 +49,7 @@ a{
   gap: 20px;
 }
 
-.ui.button.review-edit-btn
+.ui.button.review-edit-btn,
 .ui.label.review-edit-btn{
   font-size:14px;
   text-align:center;

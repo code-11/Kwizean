@@ -35,7 +35,7 @@ export default class ReviewEditButton extends Component{
           </Form.Field>
           <Form.Field required control={TextArea} name="content" label='Content' width={8} defaultValue={reviewObj ? reviewObj.content : ""}  placeholder='Tell us how you felt about this restaurant...'/>
           <Button color='black' onClick={ ()=>setParentState({addReviewModalOpen:null}) }> Cancel </Button>
-          <Button id="review-add-modal-confirm" content="Submit Restaurant" type="submit"/>
+          <Button id="review-add-modal-confirm" content="Submit Review" type="submit"/>
         </Form>
       </Modal.Content>
     </Modal>

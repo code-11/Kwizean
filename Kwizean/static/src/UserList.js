@@ -84,7 +84,8 @@ export default class Userlist extends Component{
 
   render(){
     const {users} =this.state;
-    const {userEmail,userAdminStr, setAppState} = this.props;
+    const {userEmail,userAdmin, setAppState} = this.props;
+    const userAdminStr=userAdmin ? " (Admin)" : "";
     const userList=users ? users.map((usr)=>this.createUser(usr)) : null;
     return <div className="user-list-page">
       <div className="login-banner">
@@ -95,8 +96,8 @@ export default class Userlist extends Component{
           <img className="login-banner-logo" src="icons/kwizeanFull105.png"/>
         </a>
         <div className="banner-user-label-group">
-          <Icon name="user"/>
           <p className="banner-user-label"> {userEmail+userAdminStr}</p>
+          <a onClick={()=>setAppState({pageState:"prelogin"})}> Log Out </a>
         </div>
       </div>
       <div className="detail-pane">

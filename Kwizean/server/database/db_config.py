@@ -115,7 +115,7 @@ class User(db.Model):
     last_name = Column(String(80))
     email = Column(String(80))
     phone_number = Column(String(14))
-    password = Column(Text())
+    password = Column(String)
 
     def __init__(self, first_name, last_name, email, phone_number, password, is_admin=False):
         self.first_name = first_name
