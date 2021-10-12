@@ -1,4 +1,7 @@
+//In a production environment, this would obviously be different
 const API_LOCATION="http://127.0.0.1:5000/api"
+
+/** These are utility functions which perform GET and POST requests **/
 
 export const kzPost = (endpoint, jsonData)=>{
   const requestOptions = {

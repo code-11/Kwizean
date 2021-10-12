@@ -114,6 +114,9 @@ a{
   width:100% !important;
 }
 
+/**These are ids because semantic ui was
+having higher priority over some buttons.**/
+
 #restaurant-add-model-confirm{
   background-color:#FF8000;
   color: white;

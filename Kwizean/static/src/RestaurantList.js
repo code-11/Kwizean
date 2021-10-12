@@ -3,21 +3,32 @@ import { Button, Checkbox, Card, Form, Label, Rating, Icon, Modal, Header, Loade
 import RestaurantEditButton from "./RestaurantEditButton";
 import {kzPost, kzGet} from "./Actions";
 
+/**
+This component renders a grid of restaurants ordered by average rating.
+From here the user can see the details of these reataurants
+
+If the user is an admin, there will also be
+shown links to add restaurants and edit users.
+**/
+
 export default class RestaurantList extends Component {
   constructor(props){
     super(props);
     this.state={
-      addRestaurantModelOpen:false,
-      deleteRestaurantModalId: null,
-      restaurants:[],
-      fetchingRestaurants:true,
+      addRestaurantModelOpen:false, //true or false
+      deleteRestaurantModalId: null, //null or a restaurant id
+      restaurants:[], //list of restaurants
+      fetchingRestaurants:true, //Switches on a spinner when restaurants are loading
     }
   }
 
+  //As soon as the component renders, get all restaurant data
   componentDidMount(){
     this.getRestaurants();
   }
 
+  //Network helper. Given a restaurant ID, request the details from the server
+  //and navigate to the restaurant page for that restarant
   setSelectedRestaurantDetails(id){
     const {setAppState} = this.props;
     kzPost("getrestaurantdetails",{id:id}).then(restaurantDetailResponse=>{
@@ -30,6 +41,7 @@ export default class RestaurantList extends Component {
     });
   }
 
+  //Network helper. Gets all restaurant data and sets it to state
   getRestaurants(){
     kzGet("getrestaurants").then(restaurantListResponse=>{
       if(restaurantListResponse && restaurantListResponse.success){
@@ -41,6 +53,8 @@ export default class RestaurantList extends Component {
     });
   }
 
+  //Network helper. Deletes a restaurant and refreshes the restaurnt date
+  //(which should now have one less restaurant in it!)
   deleteRestaurant(id){
     kzPost("deleterestaurant",{id}).then(restaurantDeletionResponse=>{
       if(restaurantDeletionResponse && restaurantDeletionResponse.success){
@@ -52,6 +66,7 @@ export default class RestaurantList extends Component {
     });
   }
 
+  //Creates a modal dialog for confirming restaurant deletion
   createDeleteRestaurantButton(restaurantObj){
     const {deleteRestaurantModalId} = this.state;
     return <Modal
@@ -133,6 +148,7 @@ export default class RestaurantList extends Component {
       buttonId="restaurant-add-btn"
       />;
 
+      //Only show user edit button if the user is an admin.
     const possibleUserEditBtn = !userAdmin ? null :
       <Button onClick={()=>{setAppState({pageState:"user-list"})}}> Edit Users </Button>
 

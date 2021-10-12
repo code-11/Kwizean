@@ -2,6 +2,9 @@ import React, { Component } from "react";
 import { Button, Checkbox, Card, Form } from 'semantic-ui-react'
 import {kzPost} from "./Actions";
 
+/**
+This component is a form which allows the user to create an account
+**/
 export default class CreateAccount extends Component {
   constructor(props){
     super(props);

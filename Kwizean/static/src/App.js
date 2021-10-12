@@ -5,9 +5,18 @@ import RestaurantDetail from "./RestaurantDetail";
 import UserList from "./UserList"
 import React, { Component } from "react";
 
+/**
+  This is the main entry point for the application and acts as a
+  router to the rest of the "pages of the app."
+**/
 export default class App extends Component {
   constructor(props){
     super(props);
+    //The allowable values for pageState are:
+    // "prelogin"
+    // "restaurant-list"
+    // "restaurant-detail"
+    // "user-list"
     this.state={
       pageState:"prelogin",
       userEmail: null,
@@ -18,6 +27,9 @@ export default class App extends Component {
     this.setAppState = this.setAppState.bind(this);
   }
 
+  //There are a number of times, usually for model dialogs, where children
+  //need to reach back up to refresh their page.
+  //This function allows them to do that.
   setAppState(newState){
     this.setState(newState);
   }

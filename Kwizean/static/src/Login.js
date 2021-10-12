@@ -2,10 +2,15 @@ import { Button, Checkbox, Card, Form } from 'semantic-ui-react'
 import React, { Component } from "react";
 import {kzPost} from "./Actions";
 
+/**
+This component allows the user to log in.
+**/
 export default class Login extends Component{
 
   constructor(props){
     super(props);
+    //Show failure triggers a temporary message warning
+    //the user that their log in failed
     this.state={
       showfailure:false
     }
@@ -31,6 +36,8 @@ export default class Login extends Component{
                 email:email.value,
                 admin:admin.checked,
               };
+              //On submit, send a network request attempting to log in.
+              //If it fails, show a failure message for five seconds.
               kzPost("login",data).then(value => {
                 if (value && value.success){
                   setAppState({
