@@ -56,7 +56,7 @@ export default class RestaurantList extends Component {
   //Network helper. Deletes a restaurant and refreshes the restaurnt date
   //(which should now have one less restaurant in it!)
   deleteRestaurant(id){
-    kzPost("deleterestaurant",{id}, ADMIN_OP).then(restaurantDeletionResponse=>{
+    kzPost("deleterestaurant",{id}, ADMIN_OP,'DELETE').then(restaurantDeletionResponse=>{
       if(restaurantDeletionResponse && restaurantDeletionResponse.success){
         this.setState({
           fetchingRestaurants:true,

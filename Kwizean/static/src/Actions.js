@@ -33,10 +33,10 @@ const genHeaders=(includeAuth) =>{
 
 /** These are utility functions which perform GET and POST requests **/
 
-export const kzPost = (endpoint, jsonData, includeAuth=false)=>{
+export const kzPost = (endpoint, jsonData, includeAuth=false, method="POST")=>{
   const headers=genHeaders(includeAuth);
   const requestOptions = {
-          method: 'POST',
+          method: method,
           headers: headers,
           body: JSON.stringify(jsonData),
   };

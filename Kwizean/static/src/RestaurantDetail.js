@@ -40,7 +40,7 @@ export default class RestaurantDetail extends Component {
       location:location.value,
       description:description.value,
     };
-    kzPost("updaterestaurantdetails", data, ADMIN_OP).then(value => {
+    kzPost("updaterestaurantdetails", data, ADMIN_OP,'PUT').then(value => {
       if (value && value.success){
           this.setSelectedRestaurantDetails(id);
           this.setState({
@@ -86,7 +86,7 @@ export default class RestaurantDetail extends Component {
   }
 
   updateReview(reviewObj){
-    kzPost("updatereview",reviewObj).then(value => {
+    kzPost("updatereview",reviewObj, ADMIN_OP,"PUT").then(value => {
       if (value && value.success){
         this.setState({
           addReviewModalOpen:null
@@ -99,7 +99,7 @@ export default class RestaurantDetail extends Component {
   }
 
   deleteReview(reviewId){
-    kzPost("deletereview",{reviewId}).then(value => {
+    kzPost("deletereview",{reviewId}, ADMIN_OP,'DELETE').then(value => {
       if (value && value.success){
         this.setSelectedRestaurantDetails(this.props.selectedRestaurantDetails.id);
         this.getAppropriateReviews();

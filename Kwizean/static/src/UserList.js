@@ -29,7 +29,7 @@ export default class Userlist extends Component{
   }
 
   deleteUser(userId){
-    kzPost("deleteuser",{userId}, ADMIN_OP).then(response => {
+    kzPost("deleteuser",{userId}, ADMIN_OP,"DELETE").then(response => {
       if (response && response.success){
         this.getUsers();
       }else{
@@ -39,7 +39,7 @@ export default class Userlist extends Component{
   }
 
   updateUser(userObj){
-    kzPost("updateuser",userObj, ADMIN_OP).then(response => {
+    kzPost("updateuser",userObj, ADMIN_OP,"PUT").then(response => {
       if (response && response.success){
         this.setState({
           editUserModalId:null

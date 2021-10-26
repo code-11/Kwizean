@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, String, Integer, Boolean, Text, ForeignKey, Date
+from sqlalchemy import Column, String, Integer, Boolean, Text, ForeignKey, Date, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+import uuid
 
 db = SQLAlchemy()
 '''
@@ -107,13 +109,14 @@ class Restaurant(db.Model):
     def update(self):
         db.session.commit()
 
+
 class User(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     is_admin = Column(Boolean)
     first_name = Column(String(80))
     last_name = Column(String(80))
-    email = Column(String(80))
+    email = Column(String(80), unique=True)
     phone_number = Column(String(14))
     password = Column(String)
 
@@ -126,7 +129,7 @@ class User(db.Model):
         self.is_admin = is_admin
 
     def full_name(self):
-        return self.first_name +" "+ self.last_name
+        return self.first_name + " " + self.last_name
 
     def to_dict(self):
         # No password. We don't want to send that down!
@@ -156,4 +159,24 @@ class User(db.Model):
         db.session.commit()
 
     def update(self):
+        db.session.commit()
+
+
+class KZSession(db.Model):
+    __tablename__ = 'sessions'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    creation_time = Column(DateTime(timezone=True), default=func.now())
+    token = Column(Text())
+
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self.token = uuid.uuid4().hex
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
         db.session.commit()

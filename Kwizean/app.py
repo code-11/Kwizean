@@ -58,7 +58,7 @@ def create_app():
     # Only need to do this once?
     # db_clean_init()
 
-    @app.route("/api/updatereview", methods=['POST'])
+    @app.route("/api/updatereview", methods=['POST', 'PUT'])
     def update_review():
         content_type = {'ContentType': 'application/json'}
         if auth_good(request):
@@ -75,7 +75,7 @@ def create_app():
         else:
             return unauthorized()
 
-    @app.route("/api/deletereview", methods=['POST'])
+    @app.route("/api/deletereview", methods=['POST','DELETE'])
     def delete_review():
         content_type = {'ContentType': 'application/json'}
         if auth_good(request):
@@ -166,7 +166,7 @@ def create_app():
             new_review.insert()
             return json.dumps({'success': True}), 200, content_type
 
-    @app.route('/api/updaterestaurantdetails', methods=['POST'])
+    @app.route('/api/updaterestaurantdetails', methods=['POST','PUT'])
     def update_restaurant():
         content_type = {'ContentType': 'application/json'}
         if auth_good(request):
@@ -248,10 +248,10 @@ def create_app():
         else:
             return response(False, "Failed to make restaurant", 405, content_type)
 
-    @app.route('/api/deleterestaurant', methods=['POST'])
+    @app.route('/api/deleterestaurant', methods=['POST', 'DELETE'])
     def delete_restaurant():
         content_type = {'ContentType': 'application/json'}
-        if request.method == 'POST':
+        if request.method == 'POST' or request.method == 'DELETE':
             if auth_good(request):
                 restaurant_id = request.json.get("id")
                 if restaurant_id is None:
@@ -268,7 +268,7 @@ def create_app():
         else:
             return response(False, "Failed to delete restaurant", 405, content_type)
 
-    @app.route('/api/updateuser', methods=['POST'])
+    @app.route('/api/updateuser', methods=['POST', 'PUT'])
     def update_user():
         content_type = {'ContentType': 'application/json'}
         if request.method == 'POST':
@@ -293,10 +293,10 @@ def create_app():
         else:
             return response(False, "Incorrect Request Method", 405, content_type)
 
-    @app.route('/api/deleteuser', methods=['POST'])
+    @app.route('/api/deleteuser', methods=['POST','DELETE'])
     def delete_user():
         content_type = {'ContentType': 'application/json'}
-        if request.method == 'POST':
+        if request.method == 'POST' or request.method == 'DELETE':
             if auth_good(request):
                 user_id = request.json.get("userId")
                 matching_user = User.query.filter_by(id=user_id).first()
