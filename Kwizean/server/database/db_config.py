@@ -3,6 +3,7 @@ from sqlalchemy import Column, String, Integer, Boolean, Text, ForeignKey, Date,
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import uuid
+import os
 
 db = SQLAlchemy()
 '''
@@ -13,7 +14,8 @@ setup_db(app):
 
 def setup_db(app):
     database_name = 'kwizean_db'
-    default_database_path = "postgresql://{}:{}@{}/{}".format('postgres', 'firesky1', 'localhost:5432', database_name)
+    KWIZEAN_DB_PASS= os.environ.get('KWIZEAN_DB_PASS')
+    default_database_path = "postgresql://{}:{}@{}/{}".format('postgres', KWIZEAN_DB_PASS, 'localhost:5432', database_name)
     # database_path = os.getenv('DATABASE_URL', default_database_path)
     app.config["SQLALCHEMY_DATABASE_URI"] = default_database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

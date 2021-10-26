@@ -30,11 +30,10 @@ export default class Login extends Component{
             <h1 className="login-header"> Sign in to Kwizean </h1>
             <Form onSubmit={(e)=>{
               const elements=e.target.elements;
-              const {password,email,admin} = elements;
+              const {password,email} = elements;
               const data={
                 password:password.value,
                 email:email.value,
-                admin:admin.checked,
               };
               //On submit, send a network request attempting to log in.
               //If it fails, show a failure message for five seconds.
@@ -64,9 +63,6 @@ export default class Login extends Component{
               <Form.Field>
                 <label>Password</label>
                 <input placeholder='Password' type="password" name="password" />
-              </Form.Field>
-              <Form.Field>
-                <Checkbox name="admin" label="Is Admin"/>
               </Form.Field>
               <Button id="login-submit" type='submit'>Sign In</Button>
               <a className="login-action" onClick={()=>{

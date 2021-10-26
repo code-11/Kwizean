@@ -23,15 +23,13 @@ export default class CreateAccount extends Component {
             <h1> Sign Up for Kwizean </h1>
             <Form onSubmit={(e)=>{
               const elements=e.target.elements;
-              const {firstName, lastName, phoneNumber,password,email,admin} = elements;
+              const {firstName, lastName, phoneNumber,password,email} = elements;
               const data={
                 firstName:firstName.value,
                 lastName:lastName.value,
                 phoneNumber:phoneNumber.value,
                 password:password.value,
-                email:email.value,
-                admin:admin.checked
-              };
+                email:email.value              };
               kzPost("signup",data).then(value => {
                 if (value && value.success){
                   switchLoginState("login");
@@ -63,9 +61,6 @@ export default class CreateAccount extends Component {
               <Form.Field>
                 <label>Confirm Password</label>
                 <input placeholder='Confirm Password' type="password" />
-              </Form.Field>
-              <Form.Field>
-                <Checkbox name="admin" label="Admin"/>
               </Form.Field>
               <Button id="login-submit" type='submit'>Create Account</Button>
               <a className="login-action" onClick={()=>{
