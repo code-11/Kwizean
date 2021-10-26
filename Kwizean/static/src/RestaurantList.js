@@ -1,7 +1,7 @@
 import React, { Component} from "react";
 import { Button, Checkbox, Card, Form, Label, Rating, Icon, Modal, Header, Loader } from 'semantic-ui-react'
 import RestaurantEditButton from "./RestaurantEditButton";
-import {kzPost, kzGet} from "./Actions";
+import {kzPost, kzGet, ADMIN_OP} from "./Actions";
 
 /**
 This component renders a grid of restaurants ordered by average rating.
@@ -56,7 +56,7 @@ export default class RestaurantList extends Component {
   //Network helper. Deletes a restaurant and refreshes the restaurnt date
   //(which should now have one less restaurant in it!)
   deleteRestaurant(id){
-    kzPost("deleterestaurant",{id}).then(restaurantDeletionResponse=>{
+    kzPost("deleterestaurant",{id}, ADMIN_OP).then(restaurantDeletionResponse=>{
       if(restaurantDeletionResponse && restaurantDeletionResponse.success){
         this.setState({
           fetchingRestaurants:true,
@@ -93,7 +93,7 @@ export default class RestaurantList extends Component {
       location:location.value,
       description:description.value,
     };
-    kzPost("createrestaurant",data).then(value => {
+    kzPost("createrestaurant",data, ADMIN_OP).then(value => {
       if (value && value.success){
         this.setState({
           addRestaurantModelOpen:false,

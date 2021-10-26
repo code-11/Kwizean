@@ -2,7 +2,7 @@ import React, { Component} from "react";
 import { Button, Checkbox, Card, Form, Label, Rating, Icon, Divider, Segment } from 'semantic-ui-react'
 import RestaurantEditButton from "./RestaurantEditButton";
 import ReviewEditButton from "./ReviewEditButton";
-import {kzPost, kzGet} from "./Actions";
+import {kzPost, kzGet, ADMIN_OP} from "./Actions";
 
 export default class RestaurantDetail extends Component {
   constructor(props){
@@ -40,7 +40,7 @@ export default class RestaurantDetail extends Component {
       location:location.value,
       description:description.value,
     };
-    kzPost("updaterestaurantdetails", data).then(value => {
+    kzPost("updaterestaurantdetails", data, ADMIN_OP).then(value => {
       if (value && value.success){
           this.setSelectedRestaurantDetails(id);
           this.setState({

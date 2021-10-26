@@ -1,7 +1,7 @@
 import { Button, Checkbox, Card, Form, Label, Rating, Icon, Modal, Header, Loader, Segment } from 'semantic-ui-react'
 import React, { Component} from "react";
 import UserEditButton from "./UserEditButton";
-import {kzPost, kzGet} from "./Actions";
+import {kzPost, kzGet, ADMIN_OP} from "./Actions";
 
 export default class Userlist extends Component{
   constructor(props){
@@ -17,19 +17,19 @@ export default class Userlist extends Component{
   }
 
   getUsers(){
-    kzGet("getusers").then(response => {
+    kzGet("getusers", ADMIN_OP).then(response => {
       if (response && response.success){
         this.setState({
           users:response.data,
         });
       }else{
-        console.log("Failed to get reviews");
+        console.log("Failed to get users");
       }
     });
   }
 
   deleteUser(userId){
-    kzPost("deleteuser",{userId}).then(response => {
+    kzPost("deleteuser",{userId}, ADMIN_OP).then(response => {
       if (response && response.success){
         this.getUsers();
       }else{
@@ -39,7 +39,7 @@ export default class Userlist extends Component{
   }
 
   updateUser(userObj){
-    kzPost("updateuser",userObj).then(response => {
+    kzPost("updateuser",userObj, ADMIN_OP).then(response => {
       if (response && response.success){
         this.setState({
           editUserModalId:null

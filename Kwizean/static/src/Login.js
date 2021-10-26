@@ -1,6 +1,6 @@
 import { Button, Checkbox, Card, Form } from 'semantic-ui-react'
 import React, { Component } from "react";
-import {kzPost} from "./Actions";
+import {kzPost,setUserInfo} from "./Actions";
 
 /**
 This component allows the user to log in.
@@ -40,10 +40,11 @@ export default class Login extends Component{
               //If it fails, show a failure message for five seconds.
               kzPost("login",data).then(value => {
                 if (value && value.success){
+                  setUserInfo(value.userId,value.token);
                   setAppState({
                     pageState:"restaurant-list",
                     userEmail:email.value,
-                    userAdmin:admin.checked,
+                    userAdmin:value.admin,
                     userId:value.userId,
                   });
                 }else{

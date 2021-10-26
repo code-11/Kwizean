@@ -5,13 +5,49 @@ from passlib.hash import pbkdf2_sha256
 from flask import Flask
 from flask import request
 from flask_cors import CORS
-from server.database.db_config import setup_db, db_clean_init, User, Restaurant, Review
+from server.database.db_config import setup_db, db_clean_init, User, Restaurant, Review, KZSession
 from sqlalchemy import func, desc, text
+from datetime import datetime, timedelta
 import jwt
 
+SESSION_TIMEOUT_MIN = 60
 
 def response(success, msg, code, content_type):
     return json.dumps({'success': success, 'message': msg}), code, content_type
+
+
+def unauthorized():
+    return response(False, "Unauthorized request", 401, {'ContentType': 'application/json'})
+
+
+def get_session(user_id):
+    matching_session = KZSession.query.filter_by(user_id=user_id).first()
+    if matching_session is None:
+        new_session = KZSession(user_id)
+        new_session.insert()
+        return new_session
+    else:
+        return matching_session
+
+
+def auth_good(request):
+    auth = request.authorization
+    if auth is not None:
+        matching_session, is_admin = KZSession.query\
+            .filter_by(user_id=auth.username, token=auth.password) \
+            .join(User, User.id == KZSession.user_id) \
+            .add_columns(User.is_admin) \
+            .first()
+        if matching_session is not None and is_admin:
+            time_diff = matching_session.creation_time - datetime.now()
+            if time_diff > timedelta(minutes=SESSION_TIMEOUT_MIN):
+                return False
+            else:
+                return True
+        else:
+            return False
+    else:
+        return False
 
 
 def create_app():
@@ -25,27 +61,33 @@ def create_app():
     @app.route("/api/updatereview", methods=['POST'])
     def update_review():
         content_type = {'ContentType': 'application/json'}
-        review_id = request.json.get("id")
-        rating = request.json.get("rating")
-        date = request.json.get("date")
-        content = request.json.get("content")
-        matching_review = Review.query.filter_by(id=review_id).first()
-        if matching_review is None:
-            return response(False, "No review with that ID", 400, content_type)
+        if auth_good(request):
+            review_id = request.json.get("id")
+            rating = request.json.get("rating")
+            date = request.json.get("date")
+            content = request.json.get("content")
+            matching_review = Review.query.filter_by(id=review_id).first()
+            if matching_review is None:
+                return response(False, "No review with that ID", 400, content_type)
+            else:
+                matching_review.kz_update(date, rating, content)
+                return json.dumps({'success': True}), 200, content_type
         else:
-            matching_review.kz_update(date, rating, content)
-            return json.dumps({'success': True}), 200, content_type
+            return unauthorized()
 
     @app.route("/api/deletereview", methods=['POST'])
     def delete_review():
         content_type = {'ContentType': 'application/json'}
-        review_id = request.json.get("reviewId")
-        matching_review = Review.query.filter_by(id=review_id).first()
-        if matching_review is None:
-            return response(False, "No restaurant with that ID", 400, content_type)
+        if auth_good(request):
+            review_id = request.json.get("reviewId")
+            matching_review = Review.query.filter_by(id=review_id).first()
+            if matching_review is None:
+                return response(False, "No restaurant with that ID", 400, content_type)
+            else:
+                matching_review.delete()
+                return json.dumps({'success': True}), 200, content_type
         else:
-            matching_review.delete()
-            return json.dumps({'success': True}), 200, content_type
+            return unauthorized()
 
     @app.route("/api/getreviews", methods=['POST'])
     def get_reviews():
@@ -69,7 +111,7 @@ def create_app():
         else:
             return response(False, "Wrong request type", 405, content_type)
 
-    @app.route('/api/getspecialreviews',methods=['POST'])
+    @app.route('/api/getspecialreviews', methods=['POST'])
     def get_special_reviews():
         content_type = {'ContentType': 'application/json'}
         # TODO: I'm fairly sure this, or something like it, should work.
@@ -85,6 +127,8 @@ def create_app():
 
         # Oh well, lets just sort it out on the back end.
         all_reviews = Review.query.filter_by(restaurant_id=restaurant_id).all()
+        if len(all_reviews) == 0:
+            return json.dumps({'success': True, 'data': {}}), 200, content_type
         max_rating_review = max(all_reviews, key=lambda review: review.rating)
         min_rating_review = min(all_reviews, key=lambda review: review.rating)
 
@@ -125,24 +169,28 @@ def create_app():
     @app.route('/api/updaterestaurantdetails', methods=['POST'])
     def update_restaurant():
         content_type = {'ContentType': 'application/json'}
-        restaurant_id = request.json.get("id")
-        name = request.json.get("name")
-        location = request.json.get("location")
-        description = request.json.get("description")
-        matching_restaurant = Restaurant.query.filter_by(id=restaurant_id).first()
-        if matching_restaurant is None:
-            return response(False, "No restaurant with that ID", 400, content_type)
+        if auth_good(request):
+            restaurant_id = request.json.get("id")
+            name = request.json.get("name")
+            location = request.json.get("location")
+            description = request.json.get("description")
+            matching_restaurant = Restaurant.query.filter_by(id=restaurant_id).first()
+            if matching_restaurant is None:
+                return response(False, "No restaurant with that ID", 400, content_type)
+            else:
+                matching_restaurant.kz_update(name, location, description)
+                return json.dumps({'success': True}), 200, content_type
         else:
-            matching_restaurant.kz_update(name, location, description)
-            return json.dumps({'success': True}), 200, content_type
+            return unauthorized()
 
     @app.route('/api/getrestaurantdetails', methods=['POST'])
     def get_restaurant():
         content_type = {'ContentType': 'application/json'}
         restaurant_id = request.json.get("id")
 
-        avg_rating,num_reviews = Review.query.with_entities(func.avg(Review.rating),
-                                                     func.count(Review.id)).filter_by(restaurant_id=restaurant_id).first()
+        avg_rating, num_reviews = Review.query.with_entities(func.avg(Review.rating),
+                                                             func.count(Review.id)).filter_by(
+            restaurant_id=restaurant_id).first()
 
         matching_restaurant = Restaurant.query.filter_by(id=restaurant_id).first()
         if matching_restaurant is None:
@@ -162,7 +210,8 @@ def create_app():
         # Can't quite seem to express this is sqlalchemy because of the intermediate table, so I'm going to split it into two queries and then combine when dictionaryifying them.
 
         # Lets get a collection of avg_ratings indexed by restaurantId
-        all_avg_reviews = Review.query.with_entities(Review.restaurant_id, func.avg(Review.rating), func.count(Review.id)).group_by(Review.restaurant_id).all()
+        all_avg_reviews = Review.query.with_entities(Review.restaurant_id, func.avg(Review.rating),
+                                                     func.count(Review.id)).group_by(Review.restaurant_id).all()
         avg_rating_table = {id: (avg_rating, num) for id, avg_rating, num in all_avg_reviews}
 
         # Then get all the restaurants
@@ -171,28 +220,31 @@ def create_app():
         # Then add avg_rating to all the restaurants
         def add_rating_and_dict(restaurant):
             restaurant_dict = restaurant.to_dict()
-            avg_rating, num=avg_rating_table.get(restaurant.id, (0, 0))
+            avg_rating, num = avg_rating_table.get(restaurant.id, (0, 0))
             restaurant_dict["avgRating"] = float(avg_rating)
             restaurant_dict["numReviews"] = num
             return restaurant_dict
 
         jsonified_restaurants = list(map(lambda r: add_rating_and_dict(r), all_restaurants))
-        jsonified_restaurants.sort(reverse=True,key=lambda restaurant: restaurant["avgRating"])
+        jsonified_restaurants.sort(reverse=True, key=lambda restaurant: restaurant["avgRating"])
         return json.dumps({'success': True, 'data': jsonified_restaurants}), 200, content_type
 
     @app.route('/api/createrestaurant', methods=['POST'])
     def create_restaurant():
         content_type = {'ContentType': 'application/json'}
         if request.method == 'POST':
-            name = request.json.get("name")
-            location = request.json.get("location")
-            description = request.json.get("description")
-            if name is None or location is None or description is None:
-                return response(False, "Failed to make restaurant", 400, content_type)
+            if auth_good(request):
+                name = request.json.get("name")
+                location = request.json.get("location")
+                description = request.json.get("description")
+                if name is None or location is None or description is None:
+                    return response(False, "Failed to make restaurant", 400, content_type)
+                else:
+                    new_restaurant = Restaurant(name, location, description)
+                    new_restaurant.insert()
+                    return json.dumps({'success': True}), 200, content_type
             else:
-                new_restaurant = Restaurant(name, location, description)
-                new_restaurant.insert()
-                return json.dumps({'success': True}), 200, content_type
+                return unauthorized()
         else:
             return response(False, "Failed to make restaurant", 405, content_type)
 
@@ -200,16 +252,19 @@ def create_app():
     def delete_restaurant():
         content_type = {'ContentType': 'application/json'}
         if request.method == 'POST':
-            restaurant_id = request.json.get("id")
-            if restaurant_id is None:
-                return response(False, "Failed to delete restaurant", 400, content_type)
-            else:
-                matching_restaurant = Restaurant.query.filter_by(id=restaurant_id).first()
-                if matching_restaurant is None:
-                    return response(False, "No restaurant with that ID", 400, content_type)
+            if auth_good(request):
+                restaurant_id = request.json.get("id")
+                if restaurant_id is None:
+                    return response(False, "Failed to delete restaurant", 400, content_type)
                 else:
-                    matching_restaurant.delete()
-                    return json.dumps({'success': True}), 200, content_type
+                    matching_restaurant = Restaurant.query.filter_by(id=restaurant_id).first()
+                    if matching_restaurant is None:
+                        return response(False, "No restaurant with that ID", 400, content_type)
+                    else:
+                        matching_restaurant.delete()
+                        return json.dumps({'success': True}), 200, content_type
+            else:
+                return unauthorized()
         else:
             return response(False, "Failed to delete restaurant", 405, content_type)
 
@@ -217,21 +272,24 @@ def create_app():
     def update_user():
         content_type = {'ContentType': 'application/json'}
         if request.method == 'POST':
-            user_id = request.json.get("userId")
-            first_name = request.json.get("firstName")
-            last_name = request.json.get("lastName")
-            phone_number = request.json.get("phoneNumber")
-            email = request.json.get("email")
-            admin = request.json.get("admin", False)
-            if None in [user_id, first_name, last_name, phone_number, email, admin]:
-                return response(False, "Failed to update user", 400, content_type)
-            else:
-                matching_user = User.query.filter_by(id=user_id).first()
-                if matching_user is None:
-                    return response(False, "Failed to find user", 400, content_type)
+            if auth_good(request):
+                user_id = request.json.get("userId")
+                first_name = request.json.get("firstName")
+                last_name = request.json.get("lastName")
+                phone_number = request.json.get("phoneNumber")
+                email = request.json.get("email")
+                admin = request.json.get("admin", False)
+                if None in [user_id, first_name, last_name, phone_number, email, admin]:
+                    return response(False, "Failed to update user", 400, content_type)
                 else:
-                    matching_user.kz_update(admin, first_name, last_name, email, phone_number)
-                    return json.dumps({'success': True}), 200, content_type
+                    matching_user = User.query.filter_by(id=user_id).first()
+                    if matching_user is None:
+                        return response(False, "Failed to find user", 400, content_type)
+                    else:
+                        matching_user.kz_update(admin, first_name, last_name, email, phone_number)
+                        return json.dumps({'success': True}), 200, content_type
+            else:
+                return unauthorized()
         else:
             return response(False, "Incorrect Request Method", 405, content_type)
 
@@ -239,22 +297,28 @@ def create_app():
     def delete_user():
         content_type = {'ContentType': 'application/json'}
         if request.method == 'POST':
-            user_id = request.json.get("userId")
-            matching_user = User.query.filter_by(id=user_id).first()
-            if matching_user is None:
-                return response(False, "Failed to find user", 400, content_type)
+            if auth_good(request):
+                user_id = request.json.get("userId")
+                matching_user = User.query.filter_by(id=user_id).first()
+                if matching_user is None:
+                    return response(False, "Failed to find user", 400, content_type)
+                else:
+                    matching_user.delete()
+                    return json.dumps({'success': True}), 200, content_type
             else:
-                matching_user.delete()
-                return json.dumps({'success': True}), 200, content_type
+                return unauthorized()
         else:
             return response(False, "Incorrect Request Method", 405, content_type)
 
     @app.route('/api/getusers')
     def get_users():
         content_type = {'ContentType': 'application/json'}
-        all_users = User.query.all()
-        data = list(map(lambda user: user.to_dict(), all_users))
-        return json.dumps({'success': True, "data": data}), 200, content_type
+        if auth_good(request):
+            all_users = User.query.all()
+            data = list(map(lambda user: user.to_dict(), all_users))
+            return json.dumps({'success': True, "data": data}), 200, content_type
+        else:
+            return unauthorized()
 
     @app.route('/api/login', methods=['POST'])
     def login():
@@ -262,17 +326,18 @@ def create_app():
         if request.method == 'POST':
             email = request.json.get("email")
             password = request.json.get("password")
-            admin = request.json.get("admin", False)
             if email is None or password is None:
                 return response(False, "Incorrect Login", 400, content_type)
             else:
-                matching_user = User.query.filter_by(email=email, is_admin=admin).first()
+                matching_user = User.query.filter_by(email=email).first()
                 if matching_user is None:
                     return response(False, "Incorrect Login", 400, content_type)
                 else:
-                    hashed= matching_user.password
+                    hashed = matching_user.password
                     if pbkdf2_sha256.verify(password, hashed):
-                        return json.dumps({'success': True, 'userId': matching_user.id}), 200, content_type
+                        session = get_session(matching_user.id)
+                        return json.dumps({'success': True, 'admin': matching_user.is_admin, 'userId': matching_user.id,
+                                           'token': session.token}), 200, content_type
                     else:
                         return response(False, "Incorrect Login", 403, content_type)
         else:
@@ -287,15 +352,17 @@ def create_app():
             phone_number = request.json.get("phoneNumber")
             email = request.json.get("email")
             password = request.json.get("password")
-            admin = request.json.get("admin", False)
             if first_name is None or last_name is None or phone_number is None or email is None or password is None:
                 return response(False, "Incomplete Signup", 400, content_type)
-
             else:
-                pwhash = pbkdf2_sha256.hash(password)
-                new_user = User(first_name, last_name, email, phone_number, pwhash, admin)
-                new_user.insert()
-                return json.dumps({'success': True}), 200, content_type
+                matching_user = User.query.filter_by(email=email).first()
+                if matching_user:
+                    return response(False, "Email already in use", 400, content_type)
+                else:
+                    pwhash = pbkdf2_sha256.hash(password)
+                    new_user = User(first_name, last_name, email, phone_number, pwhash, False)
+                    new_user.insert()
+                    return json.dumps({'success': True}), 200, content_type
         else:
             return response(False, "Incomplete Signup", 405, content_type)
 
